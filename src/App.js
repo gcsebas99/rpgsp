@@ -1,25 +1,24 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import { Layout } from 'antd';
+import AppNav from './components/AppNav';
+import ConfigPage from './components/pages/ConfigPage';
+import StoryPage from './components/pages/StoryPage';
+import './styles/AntDThemeConfig.less';
+import './styles/App.scss';
 
-function App() {
+const App = () => {
+  const [activePage, setActivePage] = useState('CONFIG');
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+      <Layout>
+        <AppNav onNavChange={setActivePage} />
+        <Layout className="app-layout">
+          {React.createElement(activePage === 'CONFIG' ? ConfigPage : StoryPage)}
+        </Layout>
+      </Layout>
     </div>
   );
-}
+};
 
 export default App;
