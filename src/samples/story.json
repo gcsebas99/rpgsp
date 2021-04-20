@@ -1,0 +1,15 @@
+{
+  "title": "My Playable Story",
+  "version": "0.1",
+  "config": {
+    "gamestate": null,
+    "locations": null,
+    "characters": null,
+    "custom": [
+
+    ]
+  },
+  "story": {
+
+  }
+}

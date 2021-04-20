@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Layout } from 'antd';
 import AppNav from './components/AppNav';
+import StoryTitle from './components/StoryTitle';
 import ConfigPage from './components/pages/ConfigPage';
 import StoryPage from './components/pages/StoryPage';
 import './styles/AntDThemeConfig.less';
@@ -14,6 +15,7 @@ const App = () => {
       <Layout>
         <AppNav onNavChange={setActivePage} />
         <Layout className="app-layout">
+          <StoryTitle />
           {React.createElement(activePage === 'CONFIG' ? ConfigPage : StoryPage)}
         </Layout>
       </Layout>
