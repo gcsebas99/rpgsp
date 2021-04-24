@@ -1,25 +1,13 @@
-import React, { useState } from 'react';
-import { Layout } from 'antd';
-import AppNav from './components/AppNav';
-import StoryTitle from './components/StoryTitle';
-import ConfigPage from './components/pages/ConfigPage';
-import StoryPage from './components/pages/StoryPage';
+import AppLayout from './AppLayout';
+import AppStore from './stores/AppStore';
 import './styles/AntDThemeConfig.less';
 import './styles/App.scss';
 
 const App = () => {
-  const [activePage, setActivePage] = useState('CONFIG');
-
   return (
-    <div className="app">
-      <Layout>
-        <AppNav onNavChange={setActivePage} />
-        <Layout className="app-layout">
-          <StoryTitle />
-          {React.createElement(activePage === 'CONFIG' ? ConfigPage : StoryPage)}
-        </Layout>
-      </Layout>
-    </div>
+    <AppStore>
+      <AppLayout />
+    </AppStore>
   );
 };
 

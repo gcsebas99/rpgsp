@@ -1,0 +1,11 @@
+.empty-project-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    padding-bottom: 42px;
+    width: 50%;
+  }
+}
