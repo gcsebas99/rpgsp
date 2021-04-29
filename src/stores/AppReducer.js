@@ -1,16 +1,21 @@
 const AppReducer = (state, action) => {
     switch (action.type) {
+        case 'SET_APP_DATABASE_LOAD_ERROR':
+          return {
+            ...state,
+            databaseLoadError: true,
+          };
         case 'SET_STORY_LOADED':
-            return {
-                ...state,
-                storyLoaded: action.payload,
-                page: (action.payload ? 'CONFIG' : 'EMPTY'),
+          return {
+            ...state,
+            storyLoaded: action.payload,
+            page: (action.payload ? 'CONFIG' : 'EMPTY'),
             };
         case 'SET_PAGE':
-            return {
-                ...state,
-                page: action.payload,
-            };
+          return {
+            ...state,
+            page: action.payload,
+          };
         // case 'ADD_POST':
         //     return {
         //         ...state,

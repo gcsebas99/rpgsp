@@ -3,6 +3,7 @@ import { Layout, Tabs, Button } from 'antd';
 import '../../styles/components/pages/ConfigPage.scss';
 import { PlusSquareOutlined } from '@ant-design/icons';
 import AddCustomEntity from '../AddCustomEntity';
+import SimpleEntityView from '../SimpleEntityView';
 
 const { Content } = Layout;
 const { TabPane } = Tabs;
@@ -23,7 +24,18 @@ const ConfigPage = () => {
             Locations
           </TabPane>
           <TabPane tab="Characters" key="3">
-            Characters
+            <SimpleEntityView />
+            <SimpleEntityView />
+            <SimpleEntityView />
+            <SimpleEntityView />
+            <SimpleEntityView />
+            <SimpleEntityView />
+            <SimpleEntityView />
+            <SimpleEntityView />
+            <SimpleEntityView />
+            <SimpleEntityView />
+            <SimpleEntityView />
+            <SimpleEntityView />
           </TabPane>
         </Tabs>
       </Content>
