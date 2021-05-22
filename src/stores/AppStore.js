@@ -2,6 +2,7 @@ import React, {createContext, useReducer} from "react";
 import AppReducer from './AppReducer'
 
 const initialState = {
+  initialCheckDone: false,
   databaseLoadError: false,
   storyLoaded: false,
   page: 'EMPTY',

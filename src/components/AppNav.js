@@ -1,8 +1,10 @@
 //-- Components --//
 import { useState, useEffect, useContext } from 'react';
-import { Layout, Menu, Col, Row, Button } from 'antd';
-import { SettingFilled, BookFilled, DownloadOutlined, UploadOutlined, DeleteFilled, PlusOutlined } from '@ant-design/icons';
+import { Layout, Menu, Col, Row, Button, Popconfirm } from 'antd';
+import { SettingFilled, BookFilled, DownloadOutlined, UploadOutlined, DeleteFilled, PlusOutlined, BugOutlined } from '@ant-design/icons';
 import NewStory from './NewStory';
+//-- Controller --//
+import AppLogicController from '../controllers/AppLogicController';
 //-- Context --//
 import { AppContext } from '../stores/AppStore';
 //-- Images --//
@@ -32,7 +34,13 @@ const AppNav = () => {
     dispatch({type: 'SET_STORY_LOADED', payload: true});
   };
   const clearStoryTest = () => {
-    dispatch({type: 'SET_STORY_LOADED', payload: false});
+    AppLogicController.devStartOver(dispatch);
+    //dispatch({type: 'SET_STORY_LOADED', payload: false});
+  };
+
+  //dev
+  const devStartOver = () => {
+    AppLogicController.devStartOver(dispatch);
   };
 
 
@@ -44,10 +52,10 @@ const AppNav = () => {
   const handleClick = ({key}) => {
     switch(key) {
       case '1':
-        dispatch({type: 'SET_PAGE', payload: 'CONFIG'});
+        dispatch({type: 'SET_APP_PAGE', payload: 'CONFIG'});
         break;
       case '2':
-        dispatch({type: 'SET_PAGE', payload: 'STORY'});
+        dispatch({type: 'SET_APP_PAGE', payload: 'STORY'});
         break;
       default:
         break;
@@ -64,6 +72,21 @@ const AppNav = () => {
           Story
         </Menu.Item>
       </Menu>
+    );
+  };
+
+  const renderClearStory = () => {
+    return (
+      <Popconfirm
+        title='All data will be lost. Are you sure to delete this story?'
+        onConfirm={clearStoryTest}
+        onCancel={() => {}}
+        okText='Yes'
+        cancelText='No'
+        placement='right'
+      >
+        <Button type='default' block icon={<DeleteFilled />} style={{ marginBottom: 12 }}>Clear story</Button>
+      </Popconfirm>
     );
   };
 
@@ -86,9 +109,10 @@ const AppNav = () => {
               {state.storyLoaded &&
                 <>
                   <Button type="default" block icon={<DownloadOutlined />} style={{ marginBottom: 12 }}>Download story</Button>
-                  <Button type="default" block icon={<DeleteFilled />} style={{ marginBottom: 12 }} onClick={clearStoryTest}>Clear story</Button>
+                  {renderClearStory()}
                 </>
               }
+              <Button type="default" block icon={<BugOutlined />} style={{ marginBottom: 12 }} onClick={devStartOver}>dev:startover</Button>
             </Col>
           </Row>
         }

@@ -1,12 +1,18 @@
+//-- Components --//
 import React, { useEffect, useContext } from 'react';
-import { Layout, Typography } from 'antd';
+import { Layout, Typography, Spin } from 'antd';
 import AppNav from './components/AppNav';
 import StoryTitle from './components/StoryTitle';
 import EmptyProjectPage from './components/pages/EmptyProjectPage';
 import ConfigPage from './components/pages/ConfigPage';
 import StoryPage from './components/pages/StoryPage';
+//-- Context --//
 import { AppContext } from './stores/AppStore';
-import { testDatabase } from './db/AppDatabase';
+//-- Controller --//
+import AppLogicController from './controllers/AppLogicController';
+//-- Images --//
+import logo from './images/logo192.png';
+
 
 const { Text } = Typography;
 
@@ -15,10 +21,22 @@ const AppLayout = () => {
 
   useEffect(() => {
     //Mount
-    testDatabase(dispatch);
+    AppLogicController.checkDatabaseOk(dispatch);
+    AppLogicController.checkStoryLoaded(dispatch);
+
   }, []); // eslint-disable-line
 
-  if(state.databaseLoadError){
+  if(!state.initialCheckDone) {
+    return (
+      <div className='app loading'>
+        <img src={logo} alt='RPG Story Playtesting' />
+        <Spin size='large' />
+      </div>
+    );
+    
+  }
+
+  if(state.databaseLoadError) {
     return (
       <Text>This application requires IndexedDB. Please use a browser that supports this feature.</Text>
     );

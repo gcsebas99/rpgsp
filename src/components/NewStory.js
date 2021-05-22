@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Drawer, Form, Button, Col, Row, Input } from 'antd';
+import { Drawer, Form, Button, Col, Row, Input, message } from 'antd';
 import { AppContext } from '../stores/AppStore';
 import AppLogicController from '../controllers/AppLogicController';
 
@@ -18,7 +18,6 @@ const NewStory = ({ isDrawerVisible, onDrawerClose }) => {
   }, [isDrawerVisible, form]);
 
   const openDrawer = () => {
-    //reset
     setVisible(true);
   };
 
@@ -32,22 +31,16 @@ const NewStory = ({ isDrawerVisible, onDrawerClose }) => {
     const version = values.version.trim();
     if(title === '' || version === ''){
       closeDrawer();
+      message.error('Something went wrong, sorry :(');
       return;
     }
-    //create new story routine
-      //create story in DB
-      //populate defaults in game states
-    console.log(values);
     const data = {title, version};
-    AppLogicController.createNewStory(dispatch, data)
-    .then(result => {
-
-      console.log('||--SUCCESS ausai');
-
+    AppLogicController.createNewStory(dispatch, data).then(result => {
+      closeDrawer();
+      message.success('Story created!');
     }).catch(error => {
-
-      console.log('||--FAIL ausai', error);
-
+      closeDrawer();
+      message.error('Something went wrong, sorry :(');
     });
   };
 
