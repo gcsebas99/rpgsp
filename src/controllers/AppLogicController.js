@@ -20,10 +20,11 @@ class AppLogicController {
 
   //-- Story --//
   static createNewStory(dispatch, data) {
-    return db.transaction('rw', db.stories, db.game_state_props, db.characters, async () => {
+    return db.transaction('rw', db.stories, db.game_state_props, db.characters, db.default_entity_colors, async () => {
       await db.stories.add({'title': data.title, 'version': data.version});
       await db.game_state_props.bulkAdd( AppLogicUtils.getNewStoryDefaultGameStateProps() );
       await db.characters.bulkAdd( AppLogicUtils.getNewStoryDefaultCharacters() );
+      await db.default_entity_colors.bulkAdd( AppLogicUtils.getNewStoryDefaultEntityColors() );
     }).then(result => {
       dispatch({type: 'SET_STORY_LOADED', payload: true});
     }).catch(error => {
@@ -34,6 +35,37 @@ class AppLogicController {
     // db.stories.add({'title': data.title, 'version': data.version}).then(() => {
     //   dispatch({type: 'SET_STORY_LOADED', payload: true});
     // });
+  }
+
+  //-- GameStateProps --//
+  static createNewGameStateProp(dispatch, data) {
+    return db.game_state_props.add({'name': data.name, 'type': data.type, 'default': data.defaultValue, 'edit_mode': data.editMode, 'removable': data.removable}).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static updateGameStateProp(dispatch, key, data) {
+    return db.game_state_props.update(key, {'name': data.name, 'type': data.type, 'default': data.defaultValue, 'edit_mode': data.editMode, 'removable': data.removable}).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static deleteGameStateProp(dispatch, id) {
+    return db.game_state_props.delete(id).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
   }
 
   //-- Location & Areas --//
@@ -133,7 +165,7 @@ class AppLogicController {
 
   //-- Custom Entities --//
   static createNewCustomEntityDef(dispatch, data) {
-    return db.custom_entity_defs.add({'name': data.name, 'key': data.key, 'singular_name': data.singular}).then(() => {
+    return db.custom_entity_defs.add({'name': data.name, 'key': data.key, 'singular_name': data.singular, 'color': AppLogicUtils.getCustomEntityRandomColor()}).then(() => {
       //
     }).catch(error => {
       console.log('||--FAIL', error);
@@ -177,6 +209,27 @@ class AppLogicController {
 
   static deleteCustomEntity(dispatch, id) {
     return db.custom_entities.delete(id).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  //-- Colors --//
+  static updateDefaultEntityColor(dispatch, key, data) {
+    return db.default_entity_colors.update(key, {'color': data.color}).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static updateCustomEntityDefColor(dispatch, key, data) {
+    return db.custom_entity_defs.update(key, {'color': data.color}).then(() => {
       //
     }).catch(error => {
       console.log('||--FAIL', error);

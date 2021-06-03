@@ -73,13 +73,13 @@ const AddEditCustomEntity = ({ entity = null, entityDef, isDrawerVisible, onDraw
           <Button onClick={closeDrawer} style={{ marginRight: 8 }}>
             Cancel
           </Button>
-          <Button type="primary" htmlType="submit" form='add-edit-custom-entity-id'>
+          <Button type="primary" htmlType="submit" form={'add-edit-custom-entity-id-' + entityDef.key}>
             {(entity === null) ? 'Create' : 'Update'}
           </Button>
         </div>
       }
     >
-      <Form layout='vertical' name='add-edit-custom-entity' id='add-edit-custom-entity-id' form={form} onFinish={onFinish} requiredMark={false}>
+      <Form layout='vertical' name={'add-edit-custom-entity-' + entityDef.key} id={'add-edit-custom-entity-id-' + entityDef.key} form={form} onFinish={(values) => { onFinish(values) }} requiredMark={false}>
         <Row gutter={16}>
           <Col span={24}>
             <Form.Item
