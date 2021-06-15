@@ -4,9 +4,9 @@ import AppLogicController from '../../controllers/AppLogicController';
 import { Button, message } from 'antd';
 import { useLiveQuery } from 'dexie-react-hooks';
 import db from '../../db/AppDatabase';
-import LocationView from '../LocationView';
-import AddEditLocation from '../AddEditLocation';
-import AddEditArea from '../AddEditArea';
+import LocationView from '../entity_views/LocationView';
+import AddEditLocation from '../drawers/AddEditLocation';
+import AddEditArea from '../drawers/AddEditArea';
 
 const LocationConfigSection = () => {
   const [,dispatch] = useContext(AppContext);

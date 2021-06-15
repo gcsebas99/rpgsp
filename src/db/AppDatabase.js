@@ -12,11 +12,16 @@ db.version(1).stores({
     custom_entity_defs: '++id',                     //name, key, singular_name, color
     custom_entities: '++id, custom_entity_def_id, name',  //description
     default_entity_colors: '++id',                  //name, color
+    //
+    chapters: '++id, order',                        //name, description
+    acts: '++id, order, type',                      //name, description
 });
 
 //default_entity_colors for: locations, areas, characters
 
 //game_state_props.edit_mode = (string) "none|all|name|type|default"
+
+//act.type = (string) "sequence|interactive"
 
 
 export const testDatabase = () => {

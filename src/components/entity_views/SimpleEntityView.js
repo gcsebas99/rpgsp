@@ -1,5 +1,5 @@
 import { Card, Typography, Button, Popconfirm } from 'antd';
-import '../styles/components/SimpleEntityView.scss';
+import '../../styles/components/SimpleEntityView.scss';
 
 const { Text } = Typography;
 

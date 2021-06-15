@@ -1,8 +1,8 @@
 //-- Components --//
 import { useState, useEffect, useContext } from 'react';
 import { Layout, Menu, Col, Row, Button, Popconfirm } from 'antd';
-import { SettingFilled, BookFilled, DownloadOutlined, UploadOutlined, DeleteFilled, PlusOutlined, BugOutlined } from '@ant-design/icons';
-import NewStory from './NewStory';
+import { SettingFilled, BookFilled, DownloadOutlined, UploadOutlined, DeleteFilled, PlusOutlined, BugOutlined, CaretRightOutlined } from '@ant-design/icons';
+import NewStory from './drawers/NewStory';
 //-- Controller --//
 import AppLogicController from '../controllers/AppLogicController';
 //-- Context --//
@@ -70,6 +70,9 @@ const AppNav = () => {
         </Menu.Item>
         <Menu.Item key="2" disabled={!state.storyLoaded} icon={<BookFilled />}>
           Story
+        </Menu.Item>
+        <Menu.Item key="3" disabled={!state.storyLoaded} icon={<CaretRightOutlined />}>
+          Play
         </Menu.Item>
       </Menu>
     );

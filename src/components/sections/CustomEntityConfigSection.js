@@ -4,8 +4,8 @@ import AppLogicController from '../../controllers/AppLogicController';
 import { Button, Popconfirm, message } from 'antd';
 import { useLiveQuery } from 'dexie-react-hooks';
 import db from '../../db/AppDatabase';
-import SimpleEntityView from '../SimpleEntityView';
-import AddEditCustomEntity from '../AddEditCustomEntity';
+import SimpleEntityView from '../entity_views/SimpleEntityView';
+import AddEditCustomEntity from '../drawers/AddEditCustomEntity';
 
 const CustomEntityConfigSection = ({ entityDef }) => {
   const [,dispatch] = useContext(AppContext);

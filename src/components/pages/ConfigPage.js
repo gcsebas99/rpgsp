@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Layout, Tabs, Button } from 'antd';
 import '../../styles/components/pages/ConfigPage.scss';
 import { PlusSquareOutlined, BgColorsOutlined } from '@ant-design/icons';
-import AddCustomEntity from '../AddCustomEntity';
-import EditColors from '../EditColors';
+import AddCustomEntity from '../drawers/AddCustomEntity';
+import EditColors from '../drawers/EditColors';
 import { useLiveQuery } from 'dexie-react-hooks';
 import db from '../../db/AppDatabase';
 import GameStateConfigSection from '../sections/GameStateConfigSection';
@@ -20,9 +20,9 @@ const ConfigPage = () => {
 
   const customEntityDefs = useLiveQuery(() => db.custom_entity_defs.toArray());
 
-  const addCustomEntityButton = <Button size='small' icon={<PlusSquareOutlined />} onClick={() => { setAddCustomEntityVisible(true); }}>Add entity</Button>;
+  const addCustomEntityButton = <Button size='small' key='add-custom' icon={<PlusSquareOutlined />} onClick={() => { setAddCustomEntityVisible(true); }}>Add entity</Button>;
 
-  const colorsButton = <Button size='small' icon={<BgColorsOutlined />} style={{marginRight: '4px'}} onClick={() => { setEditColorsVisible(true); }}>Colors</Button>;
+  const colorsButton = <Button size='small' key='edit-colors' icon={<BgColorsOutlined />} style={{marginRight: '4px'}} onClick={() => { setEditColorsVisible(true); }}>Colors</Button>;
 
   const buttons = [colorsButton, addCustomEntityButton];
 

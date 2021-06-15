@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import db from '../db/AppDatabase';
+import db from '../../db/AppDatabase';
 import { Drawer, Button, List, Row, Col, Divider, message } from 'antd';
-import { AppContext } from '../stores/AppStore';
-import AppLogicController from '../controllers/AppLogicController';
+import { AppContext } from '../../stores/AppStore';
+import AppLogicController from '../../controllers/AppLogicController';
 import ColorPicker from 'rc-color-picker';
 import 'rc-color-picker/assets/index.css';
 

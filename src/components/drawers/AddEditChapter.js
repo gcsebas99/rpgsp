@@ -1,26 +1,32 @@
 import { useState, useEffect, useContext } from 'react';
 import { Drawer, Form, Button, Col, Row, Input, message } from 'antd';
-import { AppContext } from '../stores/AppStore';
-import AppLogicController from '../controllers/AppLogicController';
+import { AppContext } from '../../stores/AppStore';
+import AppLogicController from '../../controllers/AppLogicController';
 
 const { TextArea } = Input;
 
-const AddEditLocation = ({ location = null, isDrawerVisible, onDrawerClose }) => {
+const AddEditChapter = ({ chapter = null, totalChapters = 0, isDrawerVisible, onDrawerClose }) => {
   const [,dispatch] = useContext(AppContext);
   const [form] = Form.useForm();
   const [visible, setVisible] = useState(false);
+  const [chapterIndex, setChapterIndex] = useState(0);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
 
   useEffect(() => {
     if(isDrawerVisible) { //opening drawer
       form.resetFields();
-      if (location) {
-        form.setFieldsValue({name: location.name, description: location.description});
+      if (chapter) {
+        form.setFieldsValue({name: chapter.name, description: chapter.description, chapterIndex: chapter.order});
+        setChapterIndex(chapter.order);
+      } else {
+        const index = totalChapters + 1;
+        form.setFieldsValue({chapterIndex: index});
+        setChapterIndex(index);
       }
       openDrawer();
     }
-  }, [isDrawerVisible, form, location]);
+  }, [isDrawerVisible, form, chapter, totalChapters]);
 
   const openDrawer = () => {
     setVisible(true);
@@ -39,19 +45,19 @@ const AddEditLocation = ({ location = null, isDrawerVisible, onDrawerClose }) =>
       message.error('Do not leave empty fields, sorry :(');
       return;
     }
-    const data = {name, description};
-    if (location === null) { //new location
-      AppLogicController.createNewLocation(dispatch, data).then(result => {
+    const data = {name, description, order: chapterIndex};
+    if (chapter === null) { //new chapter
+      AppLogicController.createNewChapter(dispatch, data).then(result => {
         closeDrawer();
-        message.success('New location created!');
+        message.success('New chapter created!');
       }).catch(error => {
         closeDrawer();
         message.error('Something went wrong, sorry :(');
       });
-    } else { //editing location
-      AppLogicController.updateLocation(dispatch, location.id, data).then(result => {
+    } else { //editing chapter
+      AppLogicController.updateChapter(dispatch, chapter.id, data).then(result => {
         closeDrawer();
-        message.success('Location edited!');
+        message.success('Chapter edited!');
       }).catch(error => {
         closeDrawer();
         message.error('Something went wrong, sorry :(');
@@ -61,7 +67,7 @@ const AddEditLocation = ({ location = null, isDrawerVisible, onDrawerClose }) =>
 
   return (
     <Drawer
-      title={(location === null) ? 'New location' : 'Edit location'}
+      title={(chapter === null) ? 'New chapter' : 'Edit chapter'}
       width={360}
       onClose={closeDrawer}
       visible={visible}
@@ -71,13 +77,23 @@ const AddEditLocation = ({ location = null, isDrawerVisible, onDrawerClose }) =>
           <Button onClick={closeDrawer} style={{ marginRight: 8 }}>
             Cancel
           </Button>
-          <Button type="primary" htmlType="submit" form='add-edit-location-id'>
-            {(location === null) ? 'Create' : 'Update'}
+          <Button type="primary" htmlType="submit" form='add-edit-chapter-id'>
+            {(chapter === null) ? 'Create' : 'Update'}
           </Button>
         </div>
       }
     >
-      <Form layout='vertical' name='add-edit-location' id='add-edit-location-id' form={form} onFinish={onFinish} requiredMark={false}>
+      <Form layout='vertical' name='add-edit-chapter' id='add-edit-chapter-id' form={form} onFinish={onFinish} requiredMark={false}>
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="chapterIndex"
+              label="Chapter"
+            >
+              <Input placeholder="#" value={chapterIndex} disabled />
+            </Form.Item>
+          </Col>
+        </Row>
         <Row gutter={16}>
           <Col span={24}>
             <Form.Item
@@ -105,4 +121,4 @@ const AddEditLocation = ({ location = null, isDrawerVisible, onDrawerClose }) =>
   );
 };
 
-export default AddEditLocation;
+export default AddEditChapter;

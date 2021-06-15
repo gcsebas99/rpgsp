@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { Drawer, Form, Button, Col, Row, Input, message } from 'antd';
-import { AppContext } from '../stores/AppStore';
-import AppLogicController from '../controllers/AppLogicController';
+import { AppContext } from '../../stores/AppStore';
+import AppLogicController from '../../controllers/AppLogicController';
 
 const NewStory = ({ isDrawerVisible, onDrawerClose }) => {
   const [,dispatch] = useContext(AppContext);

@@ -3,9 +3,9 @@ import { AppContext } from '../../stores/AppStore';
 import AppLogicController from '../../controllers/AppLogicController';
 import { useLiveQuery } from 'dexie-react-hooks';
 import db from '../../db/AppDatabase';
-import GameStateListItem from '../GameStateListItem';
+import GameStateListItem from '../entity_views/GameStateListItem';
 import { List, Row, Col, Typography, Button, message } from 'antd';
-import AddEditGameStateProp from '../AddEditGameStateProp';
+import AddEditGameStateProp from '../drawers/AddEditGameStateProp';
 
 const { Text } = Typography;
 

@@ -238,6 +238,68 @@ class AppLogicController {
     });
   }
 
+  //-- Chapters --//
+  static createNewChapter(dispatch, data) {
+    return db.chapters.add({'name': data.name, 'description': data.description, 'order': data.order}).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static updateChapter(dispatch, key, data) {
+    //do not accept order update
+    return db.chapters.update(key, {'name': data.name, 'description': data.description}).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static updateChapterOrder(dispatch, key, data) {
+    return db.transaction('rw', db.chapters, async () => {
+      const affectedChapter = await db.chapters.where('order').equals(data.order).first();
+      await db.chapters.update(key, {'order': data.order});
+      await db.chapters.update(affectedChapter.id, {'order': data.oldOrder});
+    }).then(result => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static deleteChapter(dispatch, id) {
+    return db.transaction('rw', db.chapters, async () => {
+      let newBaseOrder = null;
+      let affectedChapters = [];
+      const chapters = db.chapters.orderBy('order');
+      await chapters.each(chapter => {
+        if(newBaseOrder !== null){
+          affectedChapters.push({key: chapter.id, order: newBaseOrder + affectedChapters.length});
+        }
+        if(chapter.id === id){
+          newBaseOrder = chapter.order;
+        }
+      });
+      await db.chapters.delete(id);
+      affectedChapters.forEach(async (affected) => {
+        await db.chapters.update(affected.key, {'order': affected.order});
+      });
+    }).then(result => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
   //-- Dev --//
   static devStartOver(dispatch) {
     return db.delete().then( () => window.location.reload() );

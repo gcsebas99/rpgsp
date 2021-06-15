@@ -1,26 +1,27 @@
 import { useState, useEffect, useContext } from 'react';
 import { Drawer, Form, Button, Col, Row, Input, message } from 'antd';
-import { AppContext } from '../stores/AppStore';
-import AppLogicController from '../controllers/AppLogicController';
+import { AppContext } from '../../stores/AppStore';
+import AppLogicController from '../../controllers/AppLogicController';
 
 const { TextArea } = Input;
 
-const AddEditArea = ({ area = null, location, isDrawerVisible, onDrawerClose }) => {
+const AddEditCustomEntity = ({ entity = null, entityDef, isDrawerVisible, onDrawerClose }) => {
   const [,dispatch] = useContext(AppContext);
   const [form] = Form.useForm();
   const [visible, setVisible] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const singularCapitalized = entityDef.singular_name.toLowerCase().charAt(0).toUpperCase() + entityDef.singular_name.toLowerCase().slice(1);
 
   useEffect(() => {
     if(isDrawerVisible) { //opening drawer
       form.resetFields();
-      if (area) {
-        form.setFieldsValue({name: area.name, description: area.description});
+      if (entity) {
+        form.setFieldsValue({name: entity.name, description: entity.description});
       }
       openDrawer();
     }
-  }, [isDrawerVisible, form, area]);
+  }, [isDrawerVisible, form, entity]);
 
   const openDrawer = () => {
     setVisible(true);
@@ -40,19 +41,19 @@ const AddEditArea = ({ area = null, location, isDrawerVisible, onDrawerClose }) 
       return;
     }
     let data = {name, description};
-    if (area === null) { //new area
-      data.location_id = location.id;
-      AppLogicController.createNewArea(dispatch, data).then(result => {
+    if (entity === null) { //new entity
+      data.custom_entity_def_id = entityDef.id;
+      AppLogicController.createNewCustomEntity(dispatch, data).then(result => {
         closeDrawer();
-        message.success('New area created!');
+        message.success('New ' + entityDef.singular_name.toLowerCase() + ' created!');
       }).catch(error => {
         closeDrawer();
         message.error('Something went wrong, sorry :(');
       });
-    } else { //editing area
-      AppLogicController.updateArea(dispatch, area.id, data).then(result => {
+    } else { //editing entity
+      AppLogicController.updateCustomEntity(dispatch, entity.id, data).then(result => {
         closeDrawer();
-        message.success('Area edited!');
+        message.success(singularCapitalized + ' edited!');
       }).catch(error => {
         closeDrawer();
         message.error('Something went wrong, sorry :(');
@@ -62,7 +63,7 @@ const AddEditArea = ({ area = null, location, isDrawerVisible, onDrawerClose }) 
 
   return (
     <Drawer
-      title={((area === null) ? 'New area' : 'Edit area') + ' in ' + (location && location.name)}
+      title={((entity === null) ? 'New' : 'Edit') + ' ' + entityDef.singular_name.toLowerCase()}
       width={360}
       onClose={closeDrawer}
       visible={visible}
@@ -72,13 +73,13 @@ const AddEditArea = ({ area = null, location, isDrawerVisible, onDrawerClose }) 
           <Button onClick={closeDrawer} style={{ marginRight: 8 }}>
             Cancel
           </Button>
-          <Button type="primary" htmlType="submit" form='add-edit-area-id'>
-            {(area === null) ? 'Create' : 'Update'}
+          <Button type="primary" htmlType="submit" form={'add-edit-custom-entity-id-' + entityDef.key}>
+            {(entity === null) ? 'Create' : 'Update'}
           </Button>
         </div>
       }
     >
-      <Form layout='vertical' name='add-edit-area' id='add-edit-area-id' form={form} onFinish={onFinish} requiredMark={false}>
+      <Form layout='vertical' name={'add-edit-custom-entity-' + entityDef.key} id={'add-edit-custom-entity-id-' + entityDef.key} form={form} onFinish={(values) => { onFinish(values) }} requiredMark={false}>
         <Row gutter={16}>
           <Col span={24}>
             <Form.Item
@@ -106,4 +107,4 @@ const AddEditArea = ({ area = null, location, isDrawerVisible, onDrawerClose }) 
   );
 };
 
-export default AddEditArea;
+export default AddEditCustomEntity;

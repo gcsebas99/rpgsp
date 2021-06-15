@@ -4,8 +4,8 @@ import AppLogicController from '../../controllers/AppLogicController';
 import { Button, message } from 'antd';
 import { useLiveQuery } from 'dexie-react-hooks';
 import db from '../../db/AppDatabase';
-import SimpleEntityView from '../SimpleEntityView';
-import AddEditCharacter from '../AddEditCharacter';
+import SimpleEntityView from '../entity_views/SimpleEntityView';
+import AddEditCharacter from '../drawers/AddEditCharacter';
 
 const CharacterConfigSection = () => {
   const [,dispatch] = useContext(AppContext);

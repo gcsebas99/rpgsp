@@ -1,10 +1,10 @@
 import { useState, useEffect, useContext } from 'react';
 import { Drawer, Form, Button, Col, Row, Input, InputNumber, Select, Switch, message } from 'antd';
-import { AppContext } from '../stores/AppStore';
-import AppLogicController from '../controllers/AppLogicController';
-import AppValidationsController from '../controllers/AppValidationsController';
+import { AppContext } from '../../stores/AppStore';
+import AppLogicController from '../../controllers/AppLogicController';
+import AppValidationsController from '../../controllers/AppValidationsController';
 import { useLiveQuery } from 'dexie-react-hooks';
-import db from '../db/AppDatabase';
+import db from '../../db/AppDatabase';
 
 const { TextArea } = Input;
 const { Option } = Select;

@@ -1,5 +1,5 @@
 import { List, Row, Col, Button, Popconfirm } from 'antd';
-import '../styles/components/GameStateListItem.scss';
+import '../../styles/components/GameStateListItem.scss';
 
 const GameStateListItem = ({
   gameState,

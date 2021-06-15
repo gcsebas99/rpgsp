@@ -1,7 +1,7 @@
 import { Card, Divider, Typography, Button, List, Row, Col, Popconfirm } from 'antd';
 import { useLiveQuery } from 'dexie-react-hooks';
-import db from '../db/AppDatabase';
-import '../styles/components/LocationView.scss';
+import db from '../../db/AppDatabase';
+import '../../styles/components/LocationView.scss';
 
 const { Text } = Typography;
 

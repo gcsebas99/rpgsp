@@ -1,27 +1,26 @@
 import { useState, useEffect, useContext } from 'react';
 import { Drawer, Form, Button, Col, Row, Input, message } from 'antd';
-import { AppContext } from '../stores/AppStore';
-import AppLogicController from '../controllers/AppLogicController';
+import { AppContext } from '../../stores/AppStore';
+import AppLogicController from '../../controllers/AppLogicController';
 
 const { TextArea } = Input;
 
-const AddEditCustomEntity = ({ entity = null, entityDef, isDrawerVisible, onDrawerClose }) => {
+const AddEditLocation = ({ location = null, isDrawerVisible, onDrawerClose }) => {
   const [,dispatch] = useContext(AppContext);
   const [form] = Form.useForm();
   const [visible, setVisible] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const singularCapitalized = entityDef.singular_name.toLowerCase().charAt(0).toUpperCase() + entityDef.singular_name.toLowerCase().slice(1);
 
   useEffect(() => {
     if(isDrawerVisible) { //opening drawer
       form.resetFields();
-      if (entity) {
-        form.setFieldsValue({name: entity.name, description: entity.description});
+      if (location) {
+        form.setFieldsValue({name: location.name, description: location.description});
       }
       openDrawer();
     }
-  }, [isDrawerVisible, form, entity]);
+  }, [isDrawerVisible, form, location]);
 
   const openDrawer = () => {
     setVisible(true);
@@ -40,20 +39,19 @@ const AddEditCustomEntity = ({ entity = null, entityDef, isDrawerVisible, onDraw
       message.error('Do not leave empty fields, sorry :(');
       return;
     }
-    let data = {name, description};
-    if (entity === null) { //new entity
-      data.custom_entity_def_id = entityDef.id;
-      AppLogicController.createNewCustomEntity(dispatch, data).then(result => {
+    const data = {name, description};
+    if (location === null) { //new location
+      AppLogicController.createNewLocation(dispatch, data).then(result => {
         closeDrawer();
-        message.success('New ' + entityDef.singular_name.toLowerCase() + ' created!');
+        message.success('New location created!');
       }).catch(error => {
         closeDrawer();
         message.error('Something went wrong, sorry :(');
       });
-    } else { //editing entity
-      AppLogicController.updateCustomEntity(dispatch, entity.id, data).then(result => {
+    } else { //editing location
+      AppLogicController.updateLocation(dispatch, location.id, data).then(result => {
         closeDrawer();
-        message.success(singularCapitalized + ' edited!');
+        message.success('Location edited!');
       }).catch(error => {
         closeDrawer();
         message.error('Something went wrong, sorry :(');
@@ -63,7 +61,7 @@ const AddEditCustomEntity = ({ entity = null, entityDef, isDrawerVisible, onDraw
 
   return (
     <Drawer
-      title={((entity === null) ? 'New' : 'Edit') + ' ' + entityDef.singular_name.toLowerCase()}
+      title={(location === null) ? 'New location' : 'Edit location'}
       width={360}
       onClose={closeDrawer}
       visible={visible}
@@ -73,13 +71,13 @@ const AddEditCustomEntity = ({ entity = null, entityDef, isDrawerVisible, onDraw
           <Button onClick={closeDrawer} style={{ marginRight: 8 }}>
             Cancel
           </Button>
-          <Button type="primary" htmlType="submit" form={'add-edit-custom-entity-id-' + entityDef.key}>
-            {(entity === null) ? 'Create' : 'Update'}
+          <Button type="primary" htmlType="submit" form='add-edit-location-id'>
+            {(location === null) ? 'Create' : 'Update'}
           </Button>
         </div>
       }
     >
-      <Form layout='vertical' name={'add-edit-custom-entity-' + entityDef.key} id={'add-edit-custom-entity-id-' + entityDef.key} form={form} onFinish={(values) => { onFinish(values) }} requiredMark={false}>
+      <Form layout='vertical' name='add-edit-location' id='add-edit-location-id' form={form} onFinish={onFinish} requiredMark={false}>
         <Row gutter={16}>
           <Col span={24}>
             <Form.Item
@@ -107,4 +105,4 @@ const AddEditCustomEntity = ({ entity = null, entityDef, isDrawerVisible, onDraw
   );
 };
 
-export default AddEditCustomEntity;
+export default AddEditLocation;
