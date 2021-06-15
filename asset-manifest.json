@@ -1,0 +1,26 @@
+{
+  "files": {
+    "main.css": "/rpgsp/static/css/main.86ea62b2.chunk.css",
+    "main.js": "/rpgsp/static/js/main.16ea6758.chunk.js",
+    "main.js.map": "/rpgsp/static/js/main.16ea6758.chunk.js.map",
+    "runtime-main.js": "/rpgsp/static/js/runtime-main.20f97171.js",
+    "runtime-main.js.map": "/rpgsp/static/js/runtime-main.20f97171.js.map",
+    "static/css/2.1f849bc2.chunk.css": "/rpgsp/static/css/2.1f849bc2.chunk.css",
+    "static/js/2.cb689e76.chunk.js": "/rpgsp/static/js/2.cb689e76.chunk.js",
+    "static/js/2.cb689e76.chunk.js.map": "/rpgsp/static/js/2.cb689e76.chunk.js.map",
+    "static/js/3.33ca367e.chunk.js": "/rpgsp/static/js/3.33ca367e.chunk.js",
+    "static/js/3.33ca367e.chunk.js.map": "/rpgsp/static/js/3.33ca367e.chunk.js.map",
+    "index.html": "/rpgsp/index.html",
+    "static/css/2.1f849bc2.chunk.css.map": "/rpgsp/static/css/2.1f849bc2.chunk.css.map",
+    "static/css/main.86ea62b2.chunk.css.map": "/rpgsp/static/css/main.86ea62b2.chunk.css.map",
+    "static/js/2.cb689e76.chunk.js.LICENSE.txt": "/rpgsp/static/js/2.cb689e76.chunk.js.LICENSE.txt",
+    "static/media/jake-reading.fddcdec6.png": "/rpgsp/static/media/jake-reading.fddcdec6.png"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.20f97171.js",
+    "static/css/2.1f849bc2.chunk.css",
+    "static/js/2.cb689e76.chunk.js",
+    "static/css/main.86ea62b2.chunk.css",
+    "static/js/main.16ea6758.chunk.js"
+  ]
+}
