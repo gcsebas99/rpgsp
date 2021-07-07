@@ -291,6 +291,78 @@ class AppLogicController {
       affectedChapters.forEach(async (affected) => {
         await db.chapters.update(affected.key, {'order': affected.order});
       });
+
+      //TODO remove acts, remove sequenced actions associated to acts, remove end conditions associated to acts
+
+
+
+    }).then(result => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  //-- Acts --//
+  static createNewAct(dispatch, data) {
+    return db.acts.add({'chapter_id': data.chapter_id, 'name': data.name, 'description': data.description, 'order': data.order, 'type': data.type}).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static updateAct(dispatch, key, data) {
+    //do not accept order update
+    return db.acts.update(key, {'name': data.name, 'description': data.description}).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static updateActOrder(dispatch, key, data) {
+    return db.transaction('rw', db.acts, async () => {
+      const affectedAct = await db.acts.where({chapter_id: data.chapter_id, order: data.order}).first();
+      await db.acts.update(key, {'order': data.order});
+      await db.acts.update(affectedAct.id, {'order': data.oldOrder});
+    }).then(result => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static deleteAct(dispatch, id, chapter_id) {
+    return db.transaction('rw', db.acts, async () => {
+      let newBaseOrder = null;
+      let affectedActs = [];
+      const acts = await db.acts.where('chapter_id').equals(chapter_id).toArray();
+      const orderedActs = acts.sort((a, b) => { return a.order - b.order; });
+      await orderedActs.forEach(act => {
+        if(newBaseOrder !== null){
+          affectedActs.push({key: act.id, order: newBaseOrder + affectedActs.length});
+        }
+        if(act.id === id){
+          newBaseOrder = act.order;
+        }
+      });
+      await db.acts.delete(id);
+      affectedActs.forEach(async (affected) => {
+        await db.acts.update(affected.key, {'order': affected.order});
+      });
+
+      //TODO remove sequenced actions associated to act, remove end conditions associated to act
+
+
     }).then(result => {
       //
     }).catch(error => {

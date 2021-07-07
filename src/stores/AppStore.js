@@ -4,6 +4,8 @@ import AppReducer from './AppReducer'
 const initialState = {
   initialCheckDone: false,
   databaseLoadError: false,
+  storyLoadError: false,
+  storyErrorMessage: null,
   storyLoaded: false,
   page: 'EMPTY',
 };

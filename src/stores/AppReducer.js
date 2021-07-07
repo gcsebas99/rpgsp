@@ -11,6 +11,12 @@ const AppReducer = (state, action) => {
         databaseLoadError: true,
         initialCheckDone: true,
       };
+    case 'SET_APP_STORY_LOAD_ERROR':
+      return {
+        ...state,
+        storyLoadError: true,
+        storyErrorMessage: action.payload || null,
+      };
     case 'SET_APP_PAGE':
       return {
         ...state,

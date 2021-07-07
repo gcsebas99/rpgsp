@@ -14,7 +14,7 @@ db.version(1).stores({
     default_entity_colors: '++id',                  //name, color
     //
     chapters: '++id, order',                        //name, description
-    acts: '++id, order, type',                      //name, description
+    acts: '++id, order, chapter_id, type',          //name, description
 });
 
 //default_entity_colors for: locations, areas, characters

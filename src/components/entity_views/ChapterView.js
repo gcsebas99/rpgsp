@@ -1,8 +1,15 @@
-import { Card, Typography, Button, Popconfirm } from 'antd';
+import { useContext } from 'react';
+import { Card, Typography, Button, Popconfirm, Collapse, message } from 'antd';
 import { CaretUpOutlined, CaretDownOutlined } from '@ant-design/icons';
+import ActView from './ActView';
+import { useLiveQuery } from 'dexie-react-hooks';
+import db from '../../db/AppDatabase';
+import AppLogicController from '../../controllers/AppLogicController';
+import { AppContext } from '../../stores/AppStore';
 import '../../styles/components/entity_views/ChapterView.scss';
 
 const { Text } = Typography;
+const { Panel } = Collapse;
 
 const ChapterView = ({ 
   chapter,
@@ -14,7 +21,14 @@ const ChapterView = ({
   onEdit = () => {},
   onMoveOrderUp = () => {},
   onMoveOrderDown = () => {},
+  //
+  onAddAct = () => {},
+  onEditAct = () => {},
+  onRemoveAct = () => {},
 }) => {
+  const [,dispatch] = useContext(AppContext);
+
+  const acts = useLiveQuery(() => db.acts.where('chapter_id').equals(chapter.id).toArray() );
 
   const options = [];
   options.push(
@@ -43,7 +57,7 @@ const ChapterView = ({
     options.push(
       <Popconfirm
         key='remove-chapter'
-        title='Are you sure you want to remove this chapter?'
+        title={() => { return (<p>Are you sure you want to remove this chapter?<br/>All acts, sequence actions and end conditions associated will be removed.</p>); }}
         onConfirm={onRemove}
         onCancel={() => {}}
         okText='Yes'
@@ -55,13 +69,56 @@ const ChapterView = ({
     );
   }
 
+  const moveActUp = (act) => {
+    const orderInfo = {oldOrder: act.order, order: act.order - 1, chapter_id: chapter.id};
+    AppLogicController.updateActOrder(dispatch, act.id, orderInfo).then(result => {
+      //
+    }).catch(error => {
+      message.error('Something went wrong, sorry :(');
+    });
+  };
+
+  const moveActDown = (act) => {
+    const orderInfo = {oldOrder: act.order, order: act.order + 1, chapter_id: chapter.id};
+    AppLogicController.updateActOrder(dispatch, act.id, orderInfo).then(result => {
+      //
+    }).catch(error => {
+      message.error('Something went wrong, sorry :(');
+    });
+  };
+
   const title = 'Chapter ' + chapter.order + ': ' + chapter.name;
+  const totalActs = (acts !== undefined) ? acts.length : 0;
+  const actsCollapseHeader = (totalActs === 0) ? 'No acts' : ((totalActs === 1) ? '1 act' : totalActs + ' acts');
 
   return (
     <Card className='chapter-view' size='small' title={title} extra={options} headStyle={{ background: '#f5f5f5'}} >
       <Text>{chapter.description}</Text>
+      <Collapse defaultActiveKey={['1']} ghost>
+        <Panel header={actsCollapseHeader} key="1">
+          { acts !== undefined && acts.sort((a, b) => { return a.order - b.order; }).map((act, index) =>
+            <ActView 
+              key={act.id} 
+              act={act}
+              actIndex={index} 
+              totalActs={totalActs}
+              onRemove={() => { onRemoveAct(act) }} 
+              onEdit={() => { onEditAct(act) }} 
+              onMoveOrderUp={() => { moveActUp(act) }} 
+              onMoveOrderDown={() => { moveActDown(act) }} 
+            />
+            )
+          }
+          <Button type='default' size='small' onClick={() => { onAddAct(totalActs)}}>
+            Add Act
+          </Button>
+        </Panel>
+      </Collapse>
     </Card>
   );
 };
+/*
+              onMoveOrderUp={() => { moveCharpterUp(chapter) }} 
+              onMoveOrderDown={() => { moveCharpterDown(chapter) }} */
 
 export default ChapterView;
