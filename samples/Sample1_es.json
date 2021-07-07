@@ -1,0 +1,274 @@
+{
+  "formatName": "dexie",
+  "formatVersion": 1,
+  "data": {
+    "databaseName": "RpgspDatabase",
+    "databaseVersion": 1,
+    "tables": [
+      {
+        "name": "stories",
+        "schema": "++id",
+        "rowCount": 1
+      },
+      {
+        "name": "game_state_props",
+        "schema": "++id,name",
+        "rowCount": 7
+      },
+      {
+        "name": "locations",
+        "schema": "++id,name",
+        "rowCount": 1
+      },
+      {
+        "name": "areas",
+        "schema": "++id,location_id,name",
+        "rowCount": 2
+      },
+      {
+        "name": "characters",
+        "schema": "++id,name",
+        "rowCount": 1
+      },
+      {
+        "name": "custom_entity_defs",
+        "schema": "++id",
+        "rowCount": 1
+      },
+      {
+        "name": "custom_entities",
+        "schema": "++id,custom_entity_def_id,name",
+        "rowCount": 1
+      },
+      {
+        "name": "default_entity_colors",
+        "schema": "++id",
+        "rowCount": 3
+      },
+      {
+        "name": "chapters",
+        "schema": "++id,order",
+        "rowCount": 2
+      },
+      {
+        "name": "acts",
+        "schema": "++id,order,chapter_id,type",
+        "rowCount": 5
+      }
+    ],
+    "data": [{
+      "tableName": "stories",
+      "inbound": true,
+      "rows": [
+        {
+          "title": "Mi historia",
+          "version": "1.0",
+          "id": 1
+        }
+      ]
+    },{
+      "tableName": "game_state_props",
+      "inbound": true,
+      "rows": [
+        {
+          "name": "currentChapter",
+          "type": "integer",
+          "default": 0,
+          "edit_mode": "none",
+          "removable": false,
+          "id": 1
+        },
+        {
+          "name": "currentAct",
+          "type": "integer",
+          "default": 0,
+          "edit_mode": "none",
+          "removable": false,
+          "id": 2
+        },
+        {
+          "name": "currentActSequence",
+          "type": "integer",
+          "default": 0,
+          "edit_mode": "none",
+          "removable": false,
+          "id": 3
+        },
+        {
+          "name": "currentLocation",
+          "type": "location",
+          "default": null,
+          "edit_mode": "default",
+          "removable": false,
+          "id": 4
+        },
+        {
+          "name": "currentArea",
+          "type": "area",
+          "default": null,
+          "edit_mode": "default",
+          "removable": false,
+          "id": 5
+        },
+        {
+          "name": "playerPotions",
+          "type": "stringarr",
+          "default": "",
+          "edit_mode": "name|default",
+          "removable": true,
+          "id": 6
+        },
+        {
+          "name": "playerTarget",
+          "type": "character",
+          "default": "Pepe",
+          "edit_mode": "name|default",
+          "removable": true,
+          "id": 7
+        }
+      ]
+    },{
+      "tableName": "locations",
+      "inbound": true,
+      "rows": [
+        {
+          "name": "The family farm",
+          "description": "A quiet place",
+          "id": 1
+        }
+      ]
+    },{
+      "tableName": "areas",
+      "inbound": true,
+      "rows": [
+        {
+          "location_id": 1,
+          "name": "House",
+          "description": "Country house",
+          "id": 1
+        },
+        {
+          "location_id": 1,
+          "name": "Barn",
+          "description": "Lot of things to fix",
+          "id": 2
+        }
+      ]
+    },{
+      "tableName": "characters",
+      "inbound": true,
+      "rows": [
+        {
+          "name": "Pepe",
+          "description": "First player",
+          "id": 1
+        }
+      ]
+    },{
+      "tableName": "custom_entity_defs",
+      "inbound": true,
+      "rows": [
+        {
+          "name": "Puzzles",
+          "key": "puzzles",
+          "singular_name": "puzzle",
+          "color": "#73d13d",
+          "id": 1
+        }
+      ]
+    },{
+      "tableName": "custom_entities",
+      "inbound": true,
+      "rows": [
+        {
+          "custom_entity_def_id": 1,
+          "name": "Puzzle 1",
+          "description": "An easy puzzle (sokoban)",
+          "id": 1
+        }
+      ]
+    },{
+      "tableName": "default_entity_colors",
+      "inbound": true,
+      "rows": [
+        {
+          "name": "locations",
+          "color": "#3f6600",
+          "id": 1
+        },
+        {
+          "name": "areas",
+          "color": "#a0d911",
+          "id": 2
+        },
+        {
+          "name": "characters",
+          "color": "#1890ff",
+          "id": 3
+        }
+      ]
+    },{
+      "tableName": "chapters",
+      "inbound": true,
+      "rows": [
+        {
+          "name": "El despertar",
+          "description": "asdadads",
+          "order": 1,
+          "id": 1
+        },
+        {
+          "name": "Arreglando el grifo",
+          "description": "A reparar la toma de agua",
+          "order": 2,
+          "id": 2
+        }
+      ]
+    },{
+      "tableName": "acts",
+      "inbound": true,
+      "rows": [
+        {
+          "chapter_id": 1,
+          "name": "Luces camara accion!!",
+          "description": "PP despierta en su cuarto",
+          "order": 1,
+          "type": "sequence",
+          "id": 1
+        },
+        {
+          "chapter_id": 1,
+          "name": "Conociendo la casa",
+          "description": "Dando los primeros pasos jugables",
+          "order": 2,
+          "type": "interactive",
+          "id": 2
+        },
+        {
+          "chapter_id": 2,
+          "name": "Montaña arriba",
+          "description": "Camino hacia la toma de agua",
+          "order": 1,
+          "type": "interactive",
+          "id": 3
+        },
+        {
+          "chapter_id": 1,
+          "name": "Las llaves perdidas",
+          "description": "Buscando en la bodega oscura",
+          "order": 3,
+          "type": "interactive",
+          "id": 4
+        },
+        {
+          "chapter_id": 2,
+          "name": "2-2 cinematic",
+          "description": "TBD",
+          "order": 2,
+          "type": "sequence",
+          "id": 8
+        }
+      ]
+    }]
+  }
+}
