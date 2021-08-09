@@ -14,6 +14,7 @@ const AppReducer = (state, action) => {
     case 'SET_APP_STORY_LOAD_ERROR':
       return {
         ...state,
+        globalLoading: false,
         storyLoadError: true,
         storyErrorMessage: action.payload || null,
       };
@@ -22,12 +23,37 @@ const AppReducer = (state, action) => {
         ...state,
         page: action.payload,
       };
+    case 'SET_APP_GLOBAL_LOADING':
+      return {
+        ...state,
+        globalLoading: action.payload || false,
+      };
     case 'SET_STORY_LOADED':
       return {
         ...state,
+        globalLoading: false,
         storyLoaded: action.payload,
+        storyRunnable: false,
         page: (action.payload ? 'CONFIG' : 'EMPTY'),
-        };
+      };
+    case 'SET_STORY_VERIFYING_RUNNABLE':
+      return {
+        ...state,
+        storyVerifyingRunnable: true,
+        storyRunnable: false,
+      };
+    case 'SET_STORY_NOT_RUNNABLE':
+      return {
+        ...state,
+        storyVerifyingRunnable: false,
+        storyRunnable: false,
+      };
+    case 'SET_STORY_RUNNABLE':
+      return {
+        ...state,
+        storyVerifyingRunnable: false,
+        storyRunnable: true,
+      };
 
     // case 'ADD_POST':
     //     return {

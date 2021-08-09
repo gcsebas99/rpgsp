@@ -11,7 +11,11 @@ const GameStateListItem = ({
   if (gameState.type.endsWith('arr')) {
     defaultValue = '[ ' + gameState.default + ' ]';
   } else {
-    defaultValue = gameState.default;
+    if(gameState.type === 'boolean') {
+      defaultValue = gameState.default ? 'true' : 'false';
+    } else {
+      defaultValue = gameState.default;
+    }
   }
 
   return (

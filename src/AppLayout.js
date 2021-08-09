@@ -27,7 +27,7 @@ const AppLayout = () => {
 
   }, []); // eslint-disable-line
 
-  if(!state.initialCheckDone) {
+  if(!state.initialCheckDone || state.globalLoading) {
     return (
       <div className='app loading'>
         <img src={logo} alt='RPG Story Playtesting' />
@@ -48,7 +48,7 @@ const AppLayout = () => {
   if(state.storyLoadError) {
     return (
       <Text style={{display: 'block', textAlign: 'center', paddingTop: 50}}>
-        We were unable to load your story, please reload and make sure your file contains a RPG-SP story.<br />
+        We were unable to load your story, please reload and make sure your file/url contains a RPG-SP story.<br />
         {state.storyErrorMessage !== null && 'Error info: ' + state.storyErrorMessage}
       </Text>
     );

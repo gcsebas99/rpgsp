@@ -2,6 +2,7 @@ import db from '../db/AppDatabase';
 import { exportDB, importInto } from 'dexie-export-import';
 import download from 'downloadjs';
 
+//Controls story import/export operations
 class ImportExportStoryController {
 
   static async downloadStory(dispatch, progressCallback = () => {}, errorCallback = () => {}) {
@@ -35,7 +36,45 @@ class ImportExportStoryController {
       }
       successCallback();
     } catch (error) {
-      //TODO set app error state
+      dispatch({type: 'SET_APP_STORY_LOAD_ERROR', payload: error});
+      console.log(error);
+    }
+  }
+
+  static async loadStoryFromUrl(dispatch, url, progressCallback = () => {}, successCallback = () => {}) {
+    dispatch({type: 'SET_APP_GLOBAL_LOADING', payload: true});
+    await new Promise(r => setTimeout(r, 800));
+    try {
+      fetch(url).then(async response => {
+        if (response.status !== 200) {
+          dispatch({type: 'SET_APP_STORY_LOAD_ERROR', payload: response.status});
+          return;
+        }
+        //clear db
+        if(db.isOpen()){
+          await db.delete().then( () => db.open() );
+        }
+        //load new story
+        response.blob().then(async blob => {
+          await importInto(db, blob, {
+            acceptMissingTables: false,
+            acceptVersionDiff: false,
+            acceptNameDiff: false,
+            acceptChangedPrimaryKey: false,
+            progressCallback: progressCallback
+          });
+          const story = await db.stories.where('id').equals(1).first();
+          if (story !== undefined) {
+            dispatch({type: 'SET_STORY_LOADED', payload: true});
+            successCallback();
+          }
+        });
+      })
+      .catch(error => {
+        dispatch({type: 'SET_APP_STORY_LOAD_ERROR', payload: error});
+        console.log(error);
+      });
+    } catch (error) {
       dispatch({type: 'SET_APP_STORY_LOAD_ERROR', payload: error});
       console.log(error);
     }

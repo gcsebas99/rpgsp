@@ -2,9 +2,9 @@
 class AppLogicUtils {
   static getNewStoryDefaultGameStateProps() {
     return [
-      {name: 'currentChapter', type: 'integer', default: 0, edit_mode: 'none', removable: false},
-      {name: 'currentAct', type: 'integer', default: 0, edit_mode: 'none', removable: false},
-      {name: 'currentActSequence', type: 'integer', default: 0, edit_mode: 'none', removable: false},
+      {name: 'currentChapter', type: 'int', default: 0, edit_mode: 'none', removable: false},
+      {name: 'currentAct', type: 'int', default: 0, edit_mode: 'none', removable: false},
+      {name: 'currentActSequence', type: 'int', default: 0, edit_mode: 'none', removable: false},
       {name: 'currentLocation', type: 'location', default: null, edit_mode: 'default', removable: false},
       {name: 'currentArea', type: 'area', default: null, edit_mode: 'default', removable: false},
     ];

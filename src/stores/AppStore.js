@@ -3,10 +3,13 @@ import AppReducer from './AppReducer'
 
 const initialState = {
   initialCheckDone: false,
+  globalLoading: false,
   databaseLoadError: false,
   storyLoadError: false,
   storyErrorMessage: null,
   storyLoaded: false,
+  storyVerifyingRunnable: false,
+  storyRunnable: false,
   page: 'EMPTY',
 };
 

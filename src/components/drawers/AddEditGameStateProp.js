@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import { Drawer, Form, Button, Col, Row, Input, InputNumber, Select, Switch, message } from 'antd';
 import { AppContext } from '../../stores/AppStore';
 import AppLogicController from '../../controllers/AppLogicController';
@@ -414,10 +414,10 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
                 <Option value='character'>character</Option>
                 <Option value='characterarr'>character[]</Option>
                 { customEntityDefs !== undefined && customEntityDefs.map((customEntityDef) =>
-                  <>
+                  <Fragment key={customEntityDef.singular_name}>
                     <Option value={customEntityDef.singular_name}>{customEntityDef.singular_name}</Option>
                     <Option value={customEntityDef.singular_name + 'arr'}>{customEntityDef.singular_name}[]</Option>
-                  </>
+                  </Fragment>
                   )
                 }
               </Select>

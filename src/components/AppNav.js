@@ -5,6 +5,7 @@ import { SettingFilled, BookFilled, DownloadOutlined, UploadOutlined, DeleteFill
 import NewStory from './drawers/NewStory';
 //-- Controller --//
 import AppLogicController from '../controllers/AppLogicController';
+import AppValidationsController from '../controllers/AppValidationsController';
 import ImportExportStoryController from '../controllers/ImportExportStoryController';
 //-- Context --//
 import { AppContext } from '../stores/AppStore';
@@ -84,11 +85,24 @@ const AppNav = () => {
         dispatch({type: 'SET_APP_PAGE', payload: 'STORY'});
         break;
       case '3':
-        dispatch({type: 'SET_APP_PAGE', payload: 'PLAYMODE'});
+        AppValidationsController.verifyStoryRunnable(dispatch);
+        setTimeout(() => { dispatch({type: 'SET_APP_PAGE', payload: 'PLAYMODE'}); }, 50);
         break;
       default:
         break;
     }
+  };
+
+  const loadSample = (sampleUrl) => {
+    ImportExportStoryController.loadStoryFromUrl(dispatch, sampleUrl, importSampleProgressCallback, importSampleSuccessCallback);
+  };
+
+  const importSampleProgressCallback = () => {
+    //
+  };
+
+  const importSampleSuccessCallback = () => {
+    message.success('Sample story imported successfully!');
   };
 
   const renderMenu = () => {
@@ -148,8 +162,8 @@ const AppNav = () => {
   const renderLoadSamples = () => {
     const content = (
       <div>
-        <Button type='default' block style={{ marginBottom: 12 }}>Sample #1 (english)</Button>
-        <Button type='default' block style={{ marginBottom: 12 }}>Sample #1 (spanish)</Button>
+        <Button type='default' block style={{ marginBottom: 12 }} onClick={() => { loadSample('https://gcsebas99.github.io/rpgsp/samples/Sample1_en.json') }}>Sample #1 (english)</Button>
+        <Button type='default' block style={{ marginBottom: 12 }} onClick={() => { loadSample('https://gcsebas99.github.io/rpgsp/samples/Sample1_es.json') }}>Sample #1 (spanish)</Button>
       </div>
     );
     return (

@@ -1,4 +1,4 @@
-import { Card, Typography, Button, Popconfirm } from 'antd';
+import { Card, Typography, Button, Popconfirm, Divider } from 'antd';
 import { CaretUpOutlined, CaretDownOutlined } from '@ant-design/icons';
 import '../../styles/components/entity_views/ActView.scss';
 
@@ -61,6 +61,13 @@ const ActView = ({
   return (
     <Card className='act-view' size='small' title={title} extra={options} headStyle={{ background: '#d9d9d9'}} >
       <Text>{act.description}</Text>
+      <Divider></Divider>
+      {(act.type === 'interactive')
+        ? 
+          <Text strong>This act ends when:</Text>
+        : 
+          <Text strong>This act contains ## steps</Text>
+      }
     </Card>
   );
 };

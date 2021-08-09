@@ -1,0 +1,16 @@
+
+.playtest-configuration-section {
+  width: 60%;
+  margin: 0 auto;
+
+  .run-configuration {
+    .ant-card-body {
+      display: flex;
+      flex-direction: row;
+    }
+
+    &.enabled-state {
+      background-color: #fff2e8;
+    }
+  }
+}

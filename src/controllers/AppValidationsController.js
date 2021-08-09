@@ -1,6 +1,18 @@
 import db from '../db/AppDatabase';
 
+//Controls app-level verifications
 class AppValidationsController {
+
+  //-- verify story is runnable --//
+  static async verifyStoryRunnable(dispatch) {
+    dispatch({type: 'SET_STORY_VERIFYING_RUNNABLE'});
+
+    //TODO: Verify all data in story is set properly to execute playtesting
+
+    setTimeout(() => { dispatch({type: 'SET_STORY_RUNNABLE'}); }, 3000);
+
+  }
+
   //-- validateEntityNames --//
   static async validateEntityNames(testNames, dbTable) {
     let invalidNames = [];

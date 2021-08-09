@@ -13,7 +13,7 @@ const StoryTitle = () => {
 
   return (
     <Header className='story-title'>
-      <Title level={5}>RPG-SP: {story.title}</Title>
+      <Title level={4}>RPG-SP: {story.title}</Title>
       <Text type='secondary'>Version: {story.version}</Text>
     </Header>
   );

@@ -1,6 +1,7 @@
 import db, { testDatabase } from '../db/AppDatabase';
 import AppLogicUtils from '../utils/AppLogicUtils';
 
+//Controls modifications in app state and database
 class AppLogicController {
 
   static checkDatabaseOk(dispatch) {

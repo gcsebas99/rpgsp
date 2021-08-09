@@ -9,7 +9,7 @@ db.version(1).stores({
     locations: '++id, name',                        //description
     areas: '++id, location_id, name',               //description
     characters: '++id, name',                       //description
-    custom_entity_defs: '++id',                     //name, key, singular_name, color
+    custom_entity_defs: '++id, singular_name',      //name, key, color
     custom_entities: '++id, custom_entity_def_id, name',  //description
     default_entity_colors: '++id',                  //name, color
     //
