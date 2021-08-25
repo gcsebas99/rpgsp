@@ -4,7 +4,7 @@ import AppLogicController from '../../controllers/AppLogicController';
 import { Button, message } from 'antd';
 import { useLiveQuery } from 'dexie-react-hooks';
 import db from '../../db/AppDatabase';
-import SimpleEntityView from '../entity_views/SimpleEntityView';
+import CharacterView from '../entity_views/CharacterView';
 import AddEditCharacter from '../drawers/AddEditCharacter';
 
 const CharacterConfigSection = () => {
@@ -35,10 +35,9 @@ const CharacterConfigSection = () => {
   return (
     <div>
       { characters !== undefined && characters.map(character =>
-        <SimpleEntityView 
+        <CharacterView 
           key={character.id} 
-          entity={character} 
-          entityName='character' 
+          character={character} 
           onRemove={() => { removeCharacter(character) }} 
           onEdit={() => { editCharacter(character) }} 
         />

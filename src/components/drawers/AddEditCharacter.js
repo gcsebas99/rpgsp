@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Drawer, Form, Button, Col, Row, Input, message } from 'antd';
+import { Drawer, Form, Button, Col, Row, Input, Switch, message } from 'antd';
 import { AppContext } from '../../stores/AppStore';
 import AppLogicController from '../../controllers/AppLogicController';
 
@@ -11,12 +11,16 @@ const AddEditCharacter = ({ character = null, isDrawerVisible, onDrawerClose }) 
   const [visible, setVisible] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [isPC, setIsPC] = useState(false);
 
   useEffect(() => {
     if(isDrawerVisible) { //opening drawer
       form.resetFields();
       if (character) {
-        form.setFieldsValue({name: character.name, description: character.description});
+        form.setFieldsValue({name: character.name, description: character.description, isPC: character});
+        setIsPC(character.is_pc);
+      } else {
+        form.setFieldsValue({isPC: false});
       }
       openDrawer();
     }
@@ -34,12 +38,13 @@ const AddEditCharacter = ({ character = null, isDrawerVisible, onDrawerClose }) 
   const onFinish = (values) => {
     const name = values.name.trim();
     const description = values.description.trim();
+    const isPC = values.isPC;
     if(name === '' || description === ''){
       closeDrawer();
       message.error('Do not leave empty fields, sorry :(');
       return;
     }
-    const data = {name, description};
+    const data = {name, description, isPC};
     if (character === null) { //new character
       AppLogicController.createNewCharacter(dispatch, data).then(result => {
         closeDrawer();
@@ -100,6 +105,18 @@ const AddEditCharacter = ({ character = null, isDrawerVisible, onDrawerClose }) 
             </Form.Item>
           </Col>
         </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="isPC"
+              label="PC / NPC"
+            >
+              <Switch checkedChildren="PC" unCheckedChildren="NPC" checked={isPC} onChange={(e) => { setIsPC(e) }} />
+            </Form.Item>
+          </Col>
+        </Row>
+
       </Form>
     </Drawer>
   );

@@ -2,17 +2,17 @@
 class AppLogicUtils {
   static getNewStoryDefaultGameStateProps() {
     return [
-      {name: 'currentChapter', type: 'int', default: 0, edit_mode: 'none', removable: false},
-      {name: 'currentAct', type: 'int', default: 0, edit_mode: 'none', removable: false},
-      {name: 'currentActSequence', type: 'int', default: 0, edit_mode: 'none', removable: false},
-      {name: 'currentLocation', type: 'location', default: null, edit_mode: 'default', removable: false},
-      {name: 'currentArea', type: 'area', default: null, edit_mode: 'default', removable: false},
+      {name: 'currentChapter', type: 'int', default: 0, default_table: null, default_tids: null, edit_mode: 'none', removable: false},
+      {name: 'currentAct', type: 'int', default: 0, default_table: null, default_tids: null, edit_mode: 'none', removable: false},
+      {name: 'currentActSequence', type: 'int', default: 0, default_table: null, default_tids: null, edit_mode: 'none', removable: false},
+      {name: 'currentLocation', type: 'location', default: null, default_table: 'locations', default_tids: null, edit_mode: 'default', removable: false},
+      {name: 'currentArea', type: 'area', default: null, default_table: 'areas', default_tids: null, edit_mode: 'default', removable: false},
     ];
   }
 
   static getNewStoryDefaultCharacters() {
     return [
-      {name: '[Playable character]', description: '[Add description]'},
+      {name: '[Playable character]', description: '[Add description]', is_pc: true},
     ];
   }
 

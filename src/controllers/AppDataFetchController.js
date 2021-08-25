@@ -18,7 +18,7 @@ class AppDataFetchController {
           const locations = await db.locations.toArray();
           const areas = await db[tableName].toArray();
           return areas.map(area => {
-            area.name = area.name + ' (' + locations.find(location => location.id === area.location_id).name + ')';
+            area.displayName = area.name + ' (' + locations.find(location => location.id === area.location_id).name + ')';
             return area;
           });
         });

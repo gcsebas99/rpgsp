@@ -5,6 +5,7 @@ import AppLogicController from '../../controllers/AppLogicController';
 import AppValidationsController from '../../controllers/AppValidationsController';
 import { useLiveQuery } from 'dexie-react-hooks';
 import db from '../../db/AppDatabase';
+import EntitySelectorView from '../entity_views/EntitySelectorView';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -18,12 +19,15 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
   const [defaultValueInt, setDefaultValueInt] = useState(0);
   const [defaultValueBool, setDefaultValueBool] = useState(true);
   const [defaultValueString, setDefaultValueString] = useState('');
+  const [defaultValueEntity, setDefaultValueEntity] = useState(-1);
+  const [defaultValueEntityName, setDefaultValueEntityName] = useState(null);
   const [defaultValueArray, setDefaultValueArray] = useState(true);
 
   const customEntityDefs = useLiveQuery(() => db.custom_entity_defs.toArray());
 
   useEffect(() => {
-    const populateDefault = (defaultValue) => {
+    const populateDefault = (gameStateProp) => {
+      const defaultValue = gameStateProp.default;
       if(!type.endsWith('arr')) { //not array
         switch(type) {
           case 'int':
@@ -34,11 +38,14 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
             setDefaultValueBool(defaultValue);
             break;
           case 'string':
+            form.setFieldsValue({defaultValueString: defaultValue});
+            break;
           case 'location':
           case 'area':
           case 'character':
           default: //custom entity
-            form.setFieldsValue({defaultValueString: defaultValue});
+            setDefaultValueEntity(gameStateProp.default_tids !== null ? gameStateProp.default_tids : -1);
+            setDefaultValueEntityName(defaultValue);
             break;
         }
       } else { //array
@@ -72,7 +79,7 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
       if (gameStateProp) {
         form.setFieldsValue({name: gameStateProp.name, type: gameStateProp.type});
         setType(gameStateProp.type);
-        populateDefault(gameStateProp.default);
+        populateDefault(gameStateProp);
       }
       openDrawer();
     }
@@ -94,17 +101,24 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
     if(value === 'boolean') {
       form.setFieldsValue({defaultValueBool: defaultValueBool});
     }
+    if(value === 'string') {
+      form.setFieldsValue({defaultValueString: ''});
+    }
     if(value.endsWith('arr')){
       form.setFieldsValue({defaultValueArray: ''});
     }
-    if(value !== '' && value !== 'int' && value !== 'boolean' && !value.endsWith('arr')){
-      form.setFieldsValue({defaultValueString: ''});
+    if(value !== '' && value !== 'int' && value !== 'boolean' && value !== 'string' && !value.endsWith('arr')){
+      setDefaultValueEntity(-1);
     }
     setType(value);
   };
 
   const displaySingleLineDefaultField = () => {
-    return type !== '' && type !== 'int' && type !== 'boolean' && !type.endsWith('arr');
+    return type === 'string';
+  };
+
+  const displaySingleEntityDefaultField = () => {
+    return type !== '' && type !== 'int' && type !== 'boolean' && type !== 'string' && !type.endsWith('arr');
   };
 
   const displayArrayDefaultField = () => {
@@ -152,45 +166,15 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
         break;
       case 'boolean':
       case 'string':
-        saveGameStateProp(values);
-        break;
       case 'location':
-        const defaultLocation = values.defaultValueString.trim();
-        AppValidationsController.validateEntityNames([defaultLocation], db.locations).then(() => {
-          saveGameStateProp(values);
-        }).catch(invalidLocations => {
-          message.error('Invalid values: ' + invalidLocations.join(', '));
-        });
-        break;
       case 'area':
-        const defaultArea = values.defaultValueString.trim();
-        AppValidationsController.validateEntityNames([defaultArea], db.areas).then(() => {
-          saveGameStateProp(values);
-        }).catch(invalidAreas => {
-          message.error('Invalid values: ' + invalidAreas.join(', '));
-        });
-        break;
       case 'character':
-        const defaultCharacter = values.defaultValueString.trim();
-        AppValidationsController.validateEntityNames([defaultCharacter], db.characters).then(() => {
-          saveGameStateProp(values);
-        }).catch(invalidCharacters => {
-          message.error('Invalid values: ' + invalidCharacters.join(', '));
-        });
+        saveGameStateProp(values);
         break;
       default:
         if(!type.endsWith('arr')) { 
-          if(type !== 'boolean' && type !== 'string') { //custom entity
-            const customEntityDef = customEntityDefs.find(customEntityDef => customEntityDef.singular_name === type);
-            if (customEntityDef) {
-              const defaultEntity = values.defaultValueString.trim();
-              AppValidationsController.validateCustomEntityNames([defaultEntity], customEntityDef.id).then(() => {
-                saveGameStateProp(values);
-              }).catch(invalidEntities => {
-                message.error('Invalid values: ' + invalidEntities.join(', '));
-              });
-            }
-          }
+          //custom entity
+          saveGameStateProp(values);
         } else { //any array type
           valudateArrayTypes(values)
         }
@@ -271,10 +255,10 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
   const saveGameStateProp = (values) => {
     if (gameStateProp === null) { //new gameStateProp
       const name = values.name.trim();
-      const defaultValue = getDefaultValue(values);
+      const defaults = getDefaultValue(values);
       const editMode = 'name|default';
       const removable = true;
-      const newData = {name, type, defaultValue, editMode, removable};
+      const newData = {name, type, ...defaults, editMode, removable};
       AppLogicController.createNewGameStateProp(dispatch, newData).then(result => {
         closeDrawer();
         message.success('New game state prop created!');
@@ -284,10 +268,10 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
       });
     } else { //editing gameStateProp
       const name = values.name.trim();
-      const defaultValue = getDefaultValue(values);
+      const defaults = getDefaultValue(values);
       const editMode = gameStateProp.edit_mode;
       const removable = gameStateProp.removable;
-      const editData = {name, type, defaultValue, editMode, removable};
+      const editData = {name, type, ...defaults, editMode, removable};
       AppLogicController.updateGameStateProp(dispatch, gameStateProp.id, editData).then(result => {
         closeDrawer();
         message.success('Game state prop edited!');
@@ -302,15 +286,26 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
     if(!type.endsWith('arr')) { //not array
       switch(type) {
         case 'int':
-          return parseInt(values.defaultValueInt);
+          return {defaultValue: parseInt(values.defaultValueInt)};
         case 'boolean':
-          return values.defaultValueBool;
+          return {defaultValue: values.defaultValueBool};
         case 'string':
+          return {defaultValue: values.defaultValueString};
         case 'location':
         case 'area':
         case 'character':
         default: //custom entity
-          return values.defaultValueString;
+          let table;
+          if(type === 'location' || type === 'area' || type === 'character') {
+            table = type + 's';
+          } else {
+            table = 'custom_entities';
+          }
+          if(defaultValueEntity !== -1) {
+            return {defaultValue: defaultValueEntityName, defaultTable: table, defaultTids: defaultValueEntity};
+          } else {
+            return {defaultValue: null, defaultTable: table, defaultTids: null};
+          }
       }
     } else { //array
       const defaultValues = values.defaultValueArray;
@@ -453,6 +448,17 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
               rules={[{ required: displaySingleLineDefaultField() && type !== 'string', message: 'Please enter a default value' }]}
             >
               <Input disabled={isDefaultDisabled()} placeholder="Please enter a default value" value={defaultValueString} onChange={(e) => { setDefaultValueString(e.target.value) }} />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={16} style={{display: (displaySingleEntityDefaultField() ? 'block' : 'none')}}>
+          <Col span={24}>
+            <Form.Item
+              label="Default value"
+            >
+              {displaySingleEntityDefaultField() &&
+                <EntitySelectorView entityType={type} value={defaultValueEntity} onChangeCallback={(e, n) => { setDefaultValueEntity(e); setDefaultValueEntityName(n); }} disabled={isDefaultDisabled()} placeholder="Please select a default value" emptyOption={true} />
+              }
             </Form.Item>
           </Col>
         </Row>

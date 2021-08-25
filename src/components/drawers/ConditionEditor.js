@@ -9,15 +9,20 @@ import AppDataFetchController from '../../controllers/AppDataFetchController';
 import ConditionEditorUtils from '../../utils/ConditionEditorUtils';
 import '../../styles/components/drawers/ConditionEditor.scss';
 
+
+import ConditionEngine from '../../controllers/engines/ConditionEngine';
+
 const { TabPane } = Tabs;
 const { Text } = Typography;
 const conditionCaret = <CaretLeftOutlined key='caret' style={{color: '#fa541c'}} />;
+let engine;
 
 const ConditionEditor = ({ condition = null, isDrawerVisible, onDrawerClose }) => {
   //const [,dispatch] = useContext(AppContext);
   const [form] = Form.useForm();
   const [visible, setVisible] = useState(false);
   const [conditionType, setConditionType] = useState('1'); //1 => single, 2 => complex
+  const [validCondition, setValidCondition] = useState(false);
   //single expression
   const [singleExpression, setSingleExpression] = useState(EditorUtils.getEmptyExpression());
 
@@ -39,17 +44,15 @@ const ConditionEditor = ({ condition = null, isDrawerVisible, onDrawerClose }) =
 
   useEffect(() => {
     if(isDrawerVisible) { //opening drawer
-
-
-      //TODO: RESET VALUES
-
-
+      resetEditor();
       form.resetFields();
+
       if (condition) {
         //set type accordingly
       } else {
         setConditionType('1');
       }
+      engine = new ConditionEngine();
       openDrawer();
     }
   }, [isDrawerVisible, form, condition]);  // eslint-disable-line
@@ -63,6 +66,13 @@ const ConditionEditor = ({ condition = null, isDrawerVisible, onDrawerClose }) =
     onDrawerClose && onDrawerClose();
   };
 
+  const resetEditor = () => {
+    setSingleExpression(EditorUtils.getEmptyExpression());
+    setComplexCondition([]);
+    setComplexConditionExpressions([]);
+    setValidCondition(false);
+  };
+
   //single cond
   const handleSingleCondGSPropChange = (value) => {
     const exp = singleExpression;
@@ -74,7 +84,7 @@ const ConditionEditor = ({ condition = null, isDrawerVisible, onDrawerClose }) =
     exp.valueInputType = null;
     exp.value = null;
     setSingleExpression({ ...exp });
-    form.setFieldsValue({singleCondComparator: ''});
+    setValidCondition(false);
   };
 
   const handleSingleCondComparatorChange = (value) => {
@@ -82,12 +92,14 @@ const ConditionEditor = ({ condition = null, isDrawerVisible, onDrawerClose }) =
     exp.compId = value;
     exp.valueInputType = EditorUtils.getInputTypeForExpression(exp.gsPropType, exp.compId);
     setSingleExpression({ ...exp });
+    setValidCondition(false);
   };
 
   const handleSingleCondValueChange = (value) => {
     const exp = singleExpression;
     exp.value = value;
     setSingleExpression({ ...exp });
+    setValidCondition(false);
   };
 
   //complex condition expressions
@@ -96,6 +108,7 @@ const ConditionEditor = ({ condition = null, isDrawerVisible, onDrawerClose }) =
     const index = expressions.findIndex(exp => exp.name === expression.name);
     expressions[index] = expression;
     setComplexConditionExpressions(expressions);
+    setValidCondition(false);
   };
 
   //complex condition buttons
@@ -141,8 +154,66 @@ const ConditionEditor = ({ condition = null, isDrawerVisible, onDrawerClose }) =
         break;
     }
     setComplexCondition(newCondition);
+    setValidCondition(false);
   };
 
+  const validateCurrentCondition = () => {
+    if(conditionType === '1') { //validate single
+      setValidCondition(validateExpression(singleExpression));
+    } else { //validate complex
+      //has expressions 
+      const hasExpressions = complexConditionExpressions.length > 0;
+      //all expressions are valid
+      let validExpressions = 0;
+      complexConditionExpressions.forEach(expression => {
+        if(validateExpression(expression)) {
+          validExpressions += 1;
+        }
+      });
+      const allExpressionsValid = complexConditionExpressions.length === validExpressions;
+      //condition is js valid
+      const conditionValid = engine.validateComplexCondition(complexCondition, complexConditionExpressions);
+      setValidCondition(hasExpressions && allExpressionsValid && conditionValid);
+    }
+  };
+
+  const validateExpression = (expression) => {
+    //prop
+    if(expression.gsProp === null) {
+      return false;
+    }
+    //comparator
+    if(expression.compId === null) {
+      return false;
+    }
+    //value
+    if(expression.valueInputType === null) {
+      return false;
+    }
+    switch(expression.valueInputType) {
+      case 'SELECTOR':
+        if(expression.value === null) {
+          return false;
+        }
+        break;
+      case 'TEXT_INT':
+        if(expression.value === null || isNaN(expression.value)) {
+          return false;
+        }
+        break;
+      case 'TEXT_STRING': 
+        if(expression.value === null || expression.value.trim().length === 0) {
+          return false;
+        }
+        break;
+      case 'BOOLEAN':
+      case 'NONE':
+      default:
+        //no validation required for value
+        break;
+    }
+    return true;
+  };
 
   const onFinish = (values) => {
     // const name = values.name.trim();
@@ -211,33 +282,29 @@ const ConditionEditor = ({ condition = null, isDrawerVisible, onDrawerClose }) =
           <Button onClick={closeDrawer} style={{ marginRight: 8 }}>
             Cancel
           </Button>
-          <Button type="primary" style={{ marginRight: 8 }}>
+          <Button type="primary" style={{ marginRight: 8 }} onClick={validateCurrentCondition}>
             Validate
           </Button>
-          <Button type="primary" htmlType="submit" form='add-edit-condition-id' disabled>
+          <Button type="primary" htmlType="submit" form='add-edit-condition-id' disabled={!validCondition}>
             {(condition === null) ? 'Create' : 'Update'}
           </Button>
         </div>
       }
     >
       <Form layout='vertical' name='add-edit-condition' id='add-edit-condition-id' form={form} onFinish={onFinish} requiredMark={false}>
-        <Tabs tabPosition='left' activeKey={conditionType} onChange={(activeKey) => { setConditionType(activeKey); }}>
+        <Tabs tabPosition='left' activeKey={conditionType} onChange={(activeKey) => { setConditionType(activeKey); setValidCondition(false); }}>
           <TabPane tab="Single" key="1">
             <Row gutter={[24, 16]}>
               <Col span={8}>
                 <Form.Item
-                  name="singleCondGSProp"
                   label="Game State Prop"
-                  rules={[{ required: (conditionType === '1'), message: 'Please select a prop' }]}
                 >
                   {ConditionEditorUtils.renderGameStatePropsSelector(singleExpression.gsProp, handleSingleCondGSPropChange, gameStates)}
                 </Form.Item>
               </Col>
               <Col span={8} style={{display: (singleExpression.gsProp !== null ? 'block' : 'none')}}>
                 <Form.Item
-                  name="singleCondComparator"
                   label="Comparator"
-                  rules={[{ required: (conditionType === '1'), message: 'Please select a comparator' }]}
                 >
                   {ConditionEditorUtils.renderComparatorSelector(singleExpression.gsPropType, singleExpression.compId, handleSingleCondComparatorChange)}
                 </Form.Item>

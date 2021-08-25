@@ -40,7 +40,7 @@ class AppLogicController {
 
   //-- GameStateProps --//
   static createNewGameStateProp(dispatch, data) {
-    return db.game_state_props.add({'name': data.name, 'type': data.type, 'default': data.defaultValue, 'edit_mode': data.editMode, 'removable': data.removable}).then(() => {
+    return db.game_state_props.add({'name': data.name, 'type': data.type, 'default': data.defaultValue, 'default_table': data.defaultTable || null, 'default_tids': data.defaultTids || null, 'edit_mode': data.editMode, 'removable': data.removable}).then(() => {
       //
     }).catch(error => {
       console.log('||--FAIL', error);
@@ -135,7 +135,7 @@ class AppLogicController {
 
   //-- Character --//
   static createNewCharacter(dispatch, data) {
-    return db.characters.add({'name': data.name, 'description': data.description}).then(() => {
+    return db.characters.add({'name': data.name, 'description': data.description, 'is_pc': data.isPC}).then(() => {
       //
     }).catch(error => {
       console.log('||--FAIL', error);
@@ -145,7 +145,7 @@ class AppLogicController {
   }
 
   static updateCharacter(dispatch, key, data) {
-    return db.characters.update(key, {'name': data.name, 'description': data.description}).then(() => {
+    return db.characters.update(key, {'name': data.name, 'description': data.description, 'is_pc': data.isPC}).then(() => {
       //
     }).catch(error => {
       console.log('||--FAIL', error);
