@@ -4,6 +4,7 @@ class ConditionEngine {
   //   //console.log('||--A ConditionEngine is created, load stuff, etc');
   //   //this.gsProps = [];
   // }
+  // test
 
   validateComplexCondition(conditionParts, expressions) {
     const testingCondition = this.buildExpressionFromParts(conditionParts, true);
