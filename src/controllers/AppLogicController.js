@@ -1,5 +1,6 @@
 import db, { testDatabase } from '../db/AppDatabase';
 import AppLogicUtils from '../utils/AppLogicUtils';
+import LocationMapUtils from '../utils/LocationMapUtils';
 
 //Controls modifications in app state and database
 class AppLogicController {
@@ -90,6 +91,16 @@ class AppLogicController {
     });
   }
 
+  static updateLocationMap(dispatch, key, data) {
+    return db.locations.update(key, {'map': data.map}).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
   static deleteLocation(dispatch, id) {
     return db.transaction('rw', db.locations, db.areas, async () => {
       await db.areas.where('location_id').equals(id).delete();
@@ -104,7 +115,7 @@ class AppLogicController {
   }
 
   static createNewArea(dispatch, data) {
-    return db.areas.add({'location_id': data.location_id, 'name': data.name, 'description': data.description}).then(() => {
+    return db.areas.add({'location_id': data.location_id, 'name': data.name, 'description': data.description, 'color': data.color}).then(() => {
       //
     }).catch(error => {
       console.log('||--FAIL', error);
@@ -114,7 +125,7 @@ class AppLogicController {
   }
 
   static updateArea(dispatch, key, data) {
-    return db.areas.update(key, {'name': data.name, 'description': data.description}).then(() => {
+    return db.areas.update(key, {'name': data.name, 'description': data.description, 'color': data.color}).then(() => {
       //
     }).catch(error => {
       console.log('||--FAIL', error);
@@ -124,18 +135,42 @@ class AppLogicController {
   }
 
   static deleteArea(dispatch, id) {
-    return db.areas.delete(id).then(() => {
+    return db.transaction('rw', db.locations, db.areas, async () => {
+      const area = await db.areas.where({id: id}).first();
+      const location = await db.locations.where({id: area.location_id}).first();
+      const newJsonMap = LocationMapUtils.removeAreaFromMap(location.map, id);
+      const data = {map: newJsonMap};
+      await AppLogicController.updateLocationMap(dispatch, location.id, data);
+      await db.areas.delete(id);
+    }).then(result => {
       //
     }).catch(error => {
       console.log('||--FAIL', error);
       //return reject to allow catch chain
       return Promise.reject(error);
     });
+
+    
+    //change to transaction
+      //get location
+      //change location map
+      //save location map
+      //remove 
+
+
+
+    // return db.areas.delete(id).then(() => {
+    //   //
+    // }).catch(error => {
+    //   console.log('||--FAIL', error);
+    //   //return reject to allow catch chain
+    //   return Promise.reject(error);
+    // });
   }
 
   //-- Character --//
   static createNewCharacter(dispatch, data) {
-    return db.characters.add({'name': data.name, 'description': data.description, 'is_pc': data.isPC}).then(() => {
+    return db.characters.add({'name': data.name, 'description': data.description, 'is_pc': data.isPC, 'color': data.color}).then(() => {
       //
     }).catch(error => {
       console.log('||--FAIL', error);
@@ -145,7 +180,7 @@ class AppLogicController {
   }
 
   static updateCharacter(dispatch, key, data) {
-    return db.characters.update(key, {'name': data.name, 'description': data.description, 'is_pc': data.isPC}).then(() => {
+    return db.characters.update(key, {'name': data.name, 'description': data.description, 'is_pc': data.isPC, 'color': data.color}).then(() => {
       //
     }).catch(error => {
       console.log('||--FAIL', error);
@@ -364,6 +399,32 @@ class AppLogicController {
       //TODO remove sequenced actions associated to act, remove end conditions associated to act
 
 
+    }).then(result => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  //-- Play Mode --//
+  static startNewPlayTestRun(dispatch) {
+    return db.transaction('rw', db.play_game_state_props, db.game_state_props, async () => {
+      //clear play_game_state_props
+      await db.play_game_state_props.clear();
+      //copy all game_state_props to play_game_state_props and set values to defaults and prev to null
+      const gsps = await db.game_state_props.toArray();
+      let playProps = gsps.map(gsp => {
+        return {
+          'game_state_prop_id': gsp.id,
+          'name': gsp.name, 
+          'type': gsp.type,
+          'value': gsp.default,
+          'prev_value': null,
+        };
+      });
+      await db.play_game_state_props.bulkAdd(playProps);
     }).then(result => {
       //
     }).catch(error => {

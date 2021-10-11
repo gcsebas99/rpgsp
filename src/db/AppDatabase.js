@@ -4,6 +4,7 @@ import Dexie from 'dexie';
 const db = new Dexie('RpgspDatabase');
 
 db.version(1).stores({
+    //config
     stories: '++id',                                //title, version
     game_state_props: '++id, name',                 //type, default, edit_mode, removable, default_table, default_tids
     locations: '++id, name',                        //description, map
@@ -12,9 +13,11 @@ db.version(1).stores({
     custom_entity_defs: '++id, singular_name',      //name, key, color
     custom_entities: '++id, custom_entity_def_id, name',  //description
     default_entity_colors: '++id',                  //name, color
-    //
+    //story setup
     chapters: '++id, order',                        //name, description
     acts: '++id, order, chapter_id, type',          //name, description
+    //play-mode
+    play_game_state_props: 'game_state_prop_id, name', //type, value, prev_value
 });
 
 //default_entity_colors for: locations, areas, characters

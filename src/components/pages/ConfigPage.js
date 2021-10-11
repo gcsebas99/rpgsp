@@ -29,7 +29,7 @@ const ConfigPage = () => {
   return (
     <>
       <Content className='config-page'>
-        <Tabs type="card" size="small" tabBarExtraContent={buttons}>
+        <Tabs type="card" size="small" tabBarExtraContent={<>{buttons}</>}>
           <TabPane tab="Game State" key="1">
             <GameStateConfigSection />
           </TabPane>

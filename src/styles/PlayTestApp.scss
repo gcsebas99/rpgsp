@@ -1,0 +1,54 @@
+@import-normalize;
+
+.play-test-app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+
+  &.loading {
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 90px;
+      margin-bottom: 20px;
+    }
+  }
+}
+
+.app-layout {
+  background: #000;
+
+  .layout-row {
+    min-height: 100vh;
+    padding: 12px;
+  }
+
+  .layout-col {
+    display: flex;
+    flex-direction: column;
+
+    &.col-l {
+
+    }
+
+    &.col-c {
+
+    }
+
+    &.col-r {
+
+    }
+  }
+
+  .ant-card {
+    .ant-card-body {
+      padding: 6px 10px;
+
+      h5 {
+        margin-top: -18px;
+      }
+    }
+  }
+}

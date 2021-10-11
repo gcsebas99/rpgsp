@@ -1,12 +1,26 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
+
+//currently we can load two different apps (different themes as well)
+const App = React.lazy(() => import('./App'));
+const PlayTestApp = React.lazy(() => import('./PlayTestApp'));
+
+
+const params = new URLSearchParams(window.location.search);
+let CurrentApp;
+if(params && params.get('play') && params.get('play') === 'true') {
+  CurrentApp = PlayTestApp;
+} else {
+  CurrentApp = App;
+}
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Suspense fallback={<></>}>
+      <CurrentApp />
+    </Suspense>
   </React.StrictMode>,
   document.getElementById('root')
 );

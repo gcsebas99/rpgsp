@@ -2,8 +2,11 @@ import { useState, useEffect, useContext } from 'react';
 import { Drawer, Form, Button, Col, Row, Input, message } from 'antd';
 import { AppContext } from '../../stores/AppStore';
 import AppLogicController from '../../controllers/AppLogicController';
+import ColorPicker from 'rc-color-picker';
+import 'rc-color-picker/assets/index.css';
 
 const { TextArea } = Input;
+const DefaultColor = '#00ff00';
 
 const AddEditArea = ({ area = null, location, isDrawerVisible, onDrawerClose }) => {
   const [,dispatch] = useContext(AppContext);
@@ -11,12 +14,16 @@ const AddEditArea = ({ area = null, location, isDrawerVisible, onDrawerClose }) 
   const [visible, setVisible] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [color, setColor] = useState(DefaultColor);
 
   useEffect(() => {
     if(isDrawerVisible) { //opening drawer
       form.resetFields();
       if (area) {
         form.setFieldsValue({name: area.name, description: area.description});
+        setColor(area.color);
+      } else {
+        setColor(DefaultColor);
       }
       openDrawer();
     }
@@ -39,7 +46,7 @@ const AddEditArea = ({ area = null, location, isDrawerVisible, onDrawerClose }) 
       message.error('Do not leave empty fields, sorry :(');
       return;
     }
-    let data = {name, description};
+    let data = {name, description, color};
     if (area === null) { //new area
       data.location_id = location.id;
       AppLogicController.createNewArea(dispatch, data).then(result => {
@@ -99,6 +106,18 @@ const AddEditArea = ({ area = null, location, isDrawerVisible, onDrawerClose }) 
             >
               <TextArea rows={10} placeholder="Please enter a description" value={description} onChange={(e) => { setDescription(e.target.value) }} />
             </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={16}>
+          <Col span={18}>Color</Col>
+          <Col span={6} style={{textAlign: 'right', marginBottom: 16}}>
+            <ColorPicker
+              animation='slide-up'
+              placement='bottomRight'
+              enableAlpha={false}
+              color={color}
+              onChange={(colors) => { setColor(colors.color) }}
+            />
           </Col>
         </Row>
       </Form>

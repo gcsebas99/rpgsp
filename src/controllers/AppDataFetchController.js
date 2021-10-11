@@ -3,9 +3,28 @@ import db from '../db/AppDatabase';
 //Controls data fetch operation (read DB only)
 class AppDataFetchController {
 
+  //GSP
   static async fetchGameStateProps() {
     return db.game_state_props.toArray();
   }
+
+  static fetchPlayGameStateProps(propNames = null, liveQuery = false) {
+    if(propNames !== null) {
+      if(liveQuery) {
+        return () => db.play_game_state_props.where('name').anyOf(propNames).toArray();
+      } else {
+        return db.play_game_state_props.where('name').anyOf(propNames).toArray();
+      }
+    } else {
+      //all props
+      if(liveQuery) {
+        return () => db.play_game_state_props.toArray();
+      } else {
+        return db.play_game_state_props.toArray();
+      }
+    }
+  }
+
 
   //fetch all entities per type (location,area,character,custom)
   static async fetchStoryEntities(type) {
@@ -29,6 +48,26 @@ class AppDataFetchController {
         return db.custom_entities.where({custom_entity_def_id: entityDef.id}).toArray();
       });
     }
+  }
+
+  //fetch areas by location
+  static async fetchAreasByLocation(locationId) {
+    return db.areas.where({location_id: locationId}).toArray();
+  }
+
+  //chapters count
+  static async chaptersCount() {
+    return db.chapters.count();
+  }
+
+  //chapter by order
+  static async chapterByOrder(order) {
+    return db.chapters.where('order').equals(order).first();
+  }
+
+  //acts count
+  static async actsByChapterCount(chapter_id) {
+    return db.acts.where('chapter_id').equals(chapter_id).count();
   }
 
 }

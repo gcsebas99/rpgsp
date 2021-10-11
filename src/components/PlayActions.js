@@ -1,11 +1,12 @@
 import { useState, useEffect, useContext } from 'react';
 import { AppContext } from '../stores/AppStore';
-import { Affix, Button } from 'antd';
+import { Affix, Button, message } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
+import AppLogicController from '../controllers/AppLogicController';
 import '../styles/components/PlayActions.scss';
 
 const PlayActions = () => {
-  const [state] = useContext(AppContext);
+  const [state, dispatch] = useContext(AppContext);
   const [shouldRenderPlayMessage, setShouldRenderPlayMessage] = useState(true);
 
   useEffect(() => {
@@ -15,19 +16,31 @@ const PlayActions = () => {
     }, 5);
   }, [state.storyVerifyingRunnable]);
 
+  const runPlaytest = () => {
+    AppLogicController.startNewPlayTestRun(dispatch).then(() => {
+      const searchParams = new URLSearchParams();
+      searchParams.set('play', 'true');
+      const url = window.location.href + '?' + searchParams.toString();
+      const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+      if (newWindow) newWindow.opener = null;
+    }).catch(error => {
+      message.error('Something went wrong, sorry :(');
+    });
+  };
+
   const renderPlayMessage = () => {
-    let message;
+    let playMessage;
     if (state.storyVerifyingRunnable) {
-      message = <LoadingOutlined />;
+      playMessage = <LoadingOutlined />;
     } else {
       if (state.storyRunnable) {
-        message = <span>You're all set!! Play your story.</span>;
+        playMessage = <span>You're all set!! Play your story.</span>;
       } else {
-        message = <span>Please check "Story validation" tab.</span>;
+        playMessage = <span>Please check "Story validation" tab.</span>;
       }
     }
     return (
-      <p style={{marginBottom: 0, marginRight: 8}}>{message}</p>
+      <p style={{marginBottom: 0, marginRight: 8}}>{playMessage}</p>
     );
   };
 
@@ -35,7 +48,7 @@ const PlayActions = () => {
     <Affix>
       <div className='play-actions'>
         {shouldRenderPlayMessage && renderPlayMessage()}
-        <Button type='primary' disabled={!state.storyRunnable}>
+        <Button type='primary' disabled={!state.storyRunnable} onClick={runPlaytest}>
           RUN PLAYTEST
         </Button>
       </div>

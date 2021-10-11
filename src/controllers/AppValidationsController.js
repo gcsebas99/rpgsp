@@ -9,7 +9,7 @@ class AppValidationsController {
 
     //TODO: Verify all data in story is set properly to execute playtesting
 
-    setTimeout(() => { dispatch({type: 'SET_STORY_RUNNABLE'}); }, 3000);
+    setTimeout(() => { dispatch({type: 'SET_STORY_RUNNABLE'}); }, 1000);
 
   }
 

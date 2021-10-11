@@ -11,36 +11,61 @@ const EntitySelectorView = ({
   disabled = false,
   placeholder = '',
   emptyOption = false,
+  customFetch = null,
+  customFetchParams = null,
 }) => {
   const [entities, setEntities] = useState([]);
   const [nameProp, setNameProp] = useState('name');
 
   useEffect(() => {
     //Mount
-    AppDataFetchController.fetchStoryEntities(entityType).then((fetchedEntities) => {
-      if(entityType === 'area') {
-        setNameProp('displayName');
-      }else{
-        setNameProp('name');
-      }
-      setEntities(fetchedEntities);
-    }).catch(error => {
-      console.log('||--FAIL', error);
-    });
+    if (customFetch) {
+      fetchCustomEntities();
+    } else {
+      AppDataFetchController.fetchStoryEntities(entityType).then((fetchedEntities) => {
+        if(entityType === 'area') {
+          setNameProp('displayName');
+        }else{
+          setNameProp('name');
+        }
+        setEntities(fetchedEntities);
+      }).catch(error => {
+        console.log('||--FAIL', error);
+      });
+    }
   }, []); // eslint-disable-line
 
   useEffect(() => {
-    AppDataFetchController.fetchStoryEntities(entityType).then((fetchedEntities) => {
-      if(entityType === 'area') {
-        setNameProp('displayName');
-      }else{
-        setNameProp('name');
-      }
-      setEntities(fetchedEntities);
-    }).catch(error => {
-      console.log('||--FAIL', error);
-    });
-  }, [entityType]);
+    if (customFetch) {
+      fetchCustomEntities();
+    } else {
+      AppDataFetchController.fetchStoryEntities(entityType).then((fetchedEntities) => {
+        if(entityType === 'area') {
+          setNameProp('displayName');
+        }else{
+          setNameProp('name');
+        }
+        setEntities(fetchedEntities);
+      }).catch(error => {
+        console.log('||--FAIL', error);
+      });
+    }
+  }, [customFetch, entityType]); // eslint-disable-line
+
+  const fetchCustomEntities = () => {
+    switch(customFetch){
+      case 'areasByLocation':
+        AppDataFetchController.fetchAreasByLocation(customFetchParams.locationId).then((fetchedEntities) => {
+          setNameProp('name');
+          setEntities(fetchedEntities);
+        }).catch(error => {
+          console.log('||--FAIL', error);
+        });
+        break;
+      default:
+        break;
+    }
+  };
 
   const getEntityName = (id) => {
     return (id !== -1) ? entities.find(entity => entity.id === id).name : '';

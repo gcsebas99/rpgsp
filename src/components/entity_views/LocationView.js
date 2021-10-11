@@ -1,4 +1,5 @@
 import { Card, Divider, Typography, Button, List, Row, Col, Popconfirm } from 'antd';
+import { EnvironmentFilled } from '@ant-design/icons';
 import { useLiveQuery } from 'dexie-react-hooks';
 import db from '../../db/AppDatabase';
 import '../../styles/components/LocationView.scss';
@@ -11,6 +12,7 @@ const LocationView = ({
   canRemove = true,
   onRemove = () => {},
   onEdit = () => {},
+  onEditMap = () => {},
   //
   onAddArea = () => {},
   onEditArea = () => {},
@@ -20,6 +22,7 @@ const LocationView = ({
   const areas = useLiveQuery(() => db.areas.where('location_id').equals(location.id).toArray());
 
   const options = [];
+  options.push(<Button key='edit-map' type='link' size='small' onClick={onEditMap}>Map</Button>);
   if(canEdit) {
     options.push(<Button key='edit-location' type='link' size='small' onClick={onEdit}>Edit</Button>);
   }
@@ -58,7 +61,7 @@ const LocationView = ({
           renderItem={area => (
             <List.Item className='area-list-item'>
               <Row>
-                <Col span={6}>{area.name}</Col>
+                <Col span={6}><EnvironmentFilled style={{color: area.color}} /> {area.name}</Col>
                 <Col span={12}>{area.description}</Col>
                 <Col span={6} style={{textAlign: 'right'}}>
                   <Button type='link' size='small' onClick={() => { onEditArea(area) }}>Edit</Button>

@@ -1,4 +1,5 @@
 import { Card, Typography, Button, Popconfirm } from 'antd';
+import { StarFilled } from '@ant-design/icons';
 
 const { Text } = Typography;
 
@@ -31,9 +32,10 @@ const CharacterView = ({
   }
 
   const title = character.name + '  (' + (character.is_pc ? 'PC' : 'NPC') + ')';
+  const iconAndTitle = <> <StarFilled style={{color: character.color}} /> {title} </>;
 
   return (
-    <Card className='character-view' size='small' title={title} extra={options} headStyle={{ background: '#f5f5f5'}} style={{marginBottom: 16}} >
+    <Card className='character-view' size='small' title={iconAndTitle} extra={options} headStyle={{ background: '#f5f5f5'}} style={{marginBottom: 16}} >
       <Text>{character.description}</Text>
     </Card>
   );

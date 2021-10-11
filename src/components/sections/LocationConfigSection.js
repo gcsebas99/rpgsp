@@ -7,10 +7,12 @@ import db from '../../db/AppDatabase';
 import LocationView from '../entity_views/LocationView';
 import AddEditLocation from '../drawers/AddEditLocation';
 import AddEditArea from '../drawers/AddEditArea';
+import EditLocationMap from '../drawers/EditLocationMap';
 
 const LocationConfigSection = () => {
   const [,dispatch] = useContext(AppContext);
   const [addEditLocationVisible, setAddEditLocationVisible] = useState(false);
+  const [editLocationMapVisible, setEditLocationMapVisible] = useState(false);
   const [addEditAreaVisible, setAddEditAreaVisible] = useState(false);
   const [currentLocation, setCurrentLocation] = useState(null);
   const [currentArea, setCurrentArea] = useState(null);
@@ -26,6 +28,11 @@ const LocationConfigSection = () => {
   const editLocation = (location) => {
     setCurrentLocation(location);
     setAddEditLocationVisible(true);
+  };
+
+  const editLocationMap = (location) => {
+    setCurrentLocation(location);
+    setEditLocationMapVisible(true);
   };
 
   const removeLocation = (location) => {
@@ -65,6 +72,7 @@ const LocationConfigSection = () => {
           location={location} 
           onRemove={() => { removeLocation(location) }} 
           onEdit={() => { editLocation(location) }} 
+          onEditMap={() => { editLocationMap(location) }} 
           onAddArea={() => { addArea(location) }} 
           onEditArea={(area) => { editArea(area, location) }}
           onRemoveArea={(area) => { removeArea(area) }}
@@ -78,6 +86,11 @@ const LocationConfigSection = () => {
         location={currentLocation}
         isDrawerVisible={addEditLocationVisible} 
         onDrawerClose={() => { setAddEditLocationVisible(false); }} 
+      />
+      <EditLocationMap
+        location={currentLocation}
+        isDrawerVisible={editLocationMapVisible} 
+        onDrawerClose={() => { setEditLocationMapVisible(false); }} 
       />
       <AddEditArea
         area={currentArea}
