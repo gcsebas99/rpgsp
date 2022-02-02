@@ -41,6 +41,52 @@ class AppLogicUtils {
     return defaultColorList[Math.floor(Math.random() * 10)];
   }
 
+  static rebuildConversationCharacterIds(dialogs) {
+    let characters = {};
+    dialogs.forEach(dialog => {
+      characters[dialog.character_id] = true;
+    });
+    if (Object.keys(characters).length > 0) {
+      return ',' + Object.keys(characters).join(',') + ',';
+    } else {
+      return '';
+    }
+  }
+
+  static getPropRelatedColor(name, type, defaultColors, customEntColors) {
+    if (['currentChapter', 'currentAct', 'currentActSequence'].includes(name)) {
+      return '#00b6ff';
+    }
+    switch(type) {
+      case 'int':
+      case 'intarr':
+      case 'boolean':
+      case 'booleanarr':
+      case 'string':
+      case 'stringarr':
+        return '#fa541c';
+      case 'location':
+      case 'locationarr':
+        return defaultColors.find(def_color => def_color.name === 'locations').color;
+      case 'area':
+      case 'areaarr':
+        return defaultColors.find(def_color => def_color.name === 'areas').color;
+      case 'character':
+      case 'characterarr':
+        return defaultColors.find(def_color => def_color.name === 'characters').color;
+      default: //custom entity or entity arr
+        let singular;
+        if(type.endsWith('arr')) {
+          singular = type.slice(0,-3);
+        }else{
+          singular = type;
+        }
+        console.log('||--singular', singular);
+        return customEntColors.find(custom_def => custom_def.singular_name === singular).color;
+    }
+    return '#fa541c';
+  }
+
 }
 
 export default AppLogicUtils;

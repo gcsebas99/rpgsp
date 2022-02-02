@@ -10,10 +10,19 @@ class AppDataFetchController {
 
   static fetchPlayGameStateProps(propNames = null, liveQuery = false) {
     if(propNames !== null) {
+      const singleProp = propNames.length === 1;
       if(liveQuery) {
-        return () => db.play_game_state_props.where('name').anyOf(propNames).toArray();
+        if(singleProp) {
+          return () => db.play_game_state_props.where('name').anyOf(propNames).first();
+        } else {
+          return () => db.play_game_state_props.where('name').anyOf(propNames).toArray();
+        }
       } else {
-        return db.play_game_state_props.where('name').anyOf(propNames).toArray();
+        if(singleProp) {
+          return db.play_game_state_props.where('name').anyOf(propNames).first();
+        } else {
+          return db.play_game_state_props.where('name').anyOf(propNames).toArray();
+        }
       }
     } else {
       //all props
@@ -50,6 +59,11 @@ class AppDataFetchController {
     }
   }
 
+  //fetch all sequenced acts
+  static async fetchSequencedActs() {
+    return db.acts.where({type: 'sequence'}).toArray();
+  }
+
   //fetch areas by location
   static async fetchAreasByLocation(locationId) {
     return db.areas.where({location_id: locationId}).toArray();
@@ -68,6 +82,47 @@ class AppDataFetchController {
   //acts count
   static async actsByChapterCount(chapter_id) {
     return db.acts.where('chapter_id').equals(chapter_id).count();
+  }
+
+  //act live
+  static fetchLiveAct(actId) {
+    return () => db.acts.where('id').equals(actId ? actId : -1).first();
+  }
+
+  //chapter live
+  static fetchLiveChapter(chapterId) {
+    return () => db.chapters.where('id').equals(chapterId ? chapterId : -1).first();
+  }
+
+  //act's sequenced actions live
+  static fetchLiveSequencedActionsByAct(actId) {
+    return () => db.sequenced_actions.where('act_id').equals(actId ? actId : -1).toArray();
+  }
+
+
+  //conversations live
+  static fetchLiveConversations(filters) {
+    if(filters.character && filters.character !== -1) {
+      let regex = new RegExp(',' + filters.character + ',');
+      return () => db.conversations.filter(conversation => { return regex.test(conversation.characters); }).toArray();
+    } else {
+      return () => db.conversations.toArray();
+    }
+  }
+
+  //conversation dialogs live
+  static fetchLiveConversationDialogs(conversationId) {
+    return () => db.conversation_dialogs.where('conversation_id').equals(conversationId ? conversationId : -1).toArray();
+  }
+
+  //no-effect actions live
+  static fetchLiveNoEffectActions(filters) {
+    if(filters.character && filters.character !== -1) {
+      //let regex = new RegExp(',' + filters.character + ',');
+      //return () => db.conversations.filter(conversation => { return regex.test(conversation.characters); }).toArray();
+    } else {
+      return () => db.game_actions.where('type').equals('noeff').toArray();
+    }
   }
 
 }

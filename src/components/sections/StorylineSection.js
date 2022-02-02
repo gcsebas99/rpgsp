@@ -8,7 +8,7 @@ import ChapterView from '../entity_views/ChapterView';
 import AddEditChapter from '../drawers/AddEditChapter';
 import AddEditAct from '../drawers/AddEditAct';
 
-const StorylineSection = ({ onAddCondition }) => {
+const StorylineSection = ({ onAddEditCondition }) => {
   const [,dispatch] = useContext(AppContext);
   const [addEditChapterVisible, setAddEditChapterVisible] = useState(false);
   const [addEditActVisible, setAddEditActVisible] = useState(false);
@@ -99,7 +99,7 @@ const StorylineSection = ({ onAddCondition }) => {
       <Button type='primary' onClick={addChapter}>
         Add Chapter
       </Button>
-      <Button type='primary' onClick={onAddCondition} style={{marginLeft: 20}}>
+      <Button type='primary' onClick={onAddEditCondition} style={{marginLeft: 20}}>
         dev:ConditionEditor
       </Button>
       <AddEditChapter

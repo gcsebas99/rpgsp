@@ -1,4 +1,5 @@
-import { Card, Typography } from 'antd';
+import { Card, Typography, Button } from 'antd';
+import PlayInteractionsController from '../../controllers/PlayInteractionsController';
 const { Title } = Typography;
 
 const MapView = () => {
@@ -9,6 +10,9 @@ const MapView = () => {
       <p>Map (flexible)</p>
       <p>Card content</p>
       <p>Card content</p>
+      <Button onClick={() => { PlayInteractionsController.simulateNextAct() }}>
+        Simulate Next Act
+      </Button>
     </Card>
   );
 };

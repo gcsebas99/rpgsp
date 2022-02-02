@@ -310,13 +310,13 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
     } else { //array
       const defaultValues = values.defaultValueArray;
       if(defaultValues.length === 0) {
-        return '';
+        return {defaultValue: ''};
       }
       const valuesArray = defaultValues.split('\n');
       switch(type) {
         case 'intarr':
         case 'booleanarr':
-          return valuesArray.join(',');
+          return {defaultValue: valuesArray.join(',')};
         case 'stringarr':
         case 'locationarr':
         case 'areaarr':
@@ -326,7 +326,7 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
           for (const entry of valuesArray) {
             quotesWrappedEntries.push('"' + entry + '"');
           }
-          return quotesWrappedEntries.join(',');
+          return {defaultValue: quotesWrappedEntries.join(',')};
       }
     }
   };

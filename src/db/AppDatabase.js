@@ -16,8 +16,22 @@ db.version(1).stores({
     //story setup
     chapters: '++id, order',                        //name, description
     acts: '++id, order, chapter_id, type',          //name, description
+    sequenced_actions: '++id, act_id, order',       //text_value, type, character_id
+
+    //navigation_actions: '++id',                   //description, effects
+    //interactive_actions: '++id',                  //description, effects
+    //no_effect_actions: '++id',                    //description, effects
+
+    game_actions: '++id, type',                     //description, allow_repeat, required_condition
+
+    //action_associations: '++id', 
+
+    conversations: '++id',                          //name, characters
+    conversation_dialogs: '++id, conversation_id, order',  //dialog, character_id
+
+
     //play-mode
-    play_game_state_props: 'game_state_prop_id, name', //type, value, prev_value
+    play_game_state_props: 'game_state_prop_id, name', //type, value, prev_value, color
 });
 
 //default_entity_colors for: locations, areas, characters
@@ -25,6 +39,26 @@ db.version(1).stores({
 //game_state_props.edit_mode = (string) "none|all|name|type|default"
 
 //act.type = (string) "sequence|interactive"
+
+//sequenced_action.type = (string) "description|dialog"
+
+//game_actions.type = (string) "nav|noeff|inter"
+//nav = in navigation tab, must have area change in effects (currentArea)
+//noeff = no effect allowed
+//inter = no area change allowed (currentArea)
+
+//game_actions.required_condition = (json)
+// {
+//    mode: "simple|complex",
+//    expressions: [
+//      { gsp_id: (id), compId: (id), value: (multiple), valueDisplay: (string|null)},
+//    ],
+//    logic_func: (object), (for complex only)
+//    display: [{type: 'exp', propName: (string), comp: (string), value: (multiple)}], (single)
+//    display: [{type: 'exp', propName: (string), comp: (string), value: (multiple)}, {type: 'logic', name: (string)}, {type: 'grouping', name: (string)}], (complex)
+// }
+
+//conversations.characters = (string) "|1|4|9|" (character ids)
 
 
 export const testDatabase = () => {

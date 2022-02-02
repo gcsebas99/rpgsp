@@ -1,5 +1,21 @@
 
 class EditorUtils {
+  static getComparatorName(id) {
+    switch(id) {
+      case 'EQUALS': return 'Equals';
+      case 'NOT_EQUALS': return 'Not equals';
+      case 'LOWER': return 'Lower than';
+      case 'GREATER': return 'Greater than';
+      case 'IS_EMPTY': return 'Is empty';
+      case 'CONTAINS': return 'Contains';
+      case 'NOT_CONTAINS': return 'Not contains';
+      case 'SIZE_EQUALS': return 'Size equals';
+      case 'SIZE_LOWER': return 'Size lower than';
+      case 'SIZE_GREATER': return 'Size greater than';
+      default: return '';
+    }
+  }
+
   static getComparatorsForPropType(propType) {
     if(!propType.endsWith('arr')) { //not array
       switch(propType) {
@@ -96,7 +112,8 @@ class EditorUtils {
       comp: null,
       compId: null,
       valueInputType: null,
-      value: null
+      value: null,
+      valueDisplay: null,
     };
     if(name) {
       emptyExpression.name = name;

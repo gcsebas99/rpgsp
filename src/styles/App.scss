@@ -21,6 +21,21 @@
   background: #fff;
 }
 
+.ant-card.low-padding {
+  .ant-card-body {
+    padding: 6px 10px;
+  }
+}
+
+.ant-card.border-title {
+  .ant-card-body {
+    h5 {
+      margin-top: -16px;
+      font-size: 13px;
+    }
+  }
+}
+
 
 // .App-logo {
 //   height: 40vmin;

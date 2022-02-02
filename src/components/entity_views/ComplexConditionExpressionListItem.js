@@ -17,6 +17,7 @@ const ComplexConditionExpressionListItem = ({
     exp.compId = null;
     exp.valueInputType = null;
     exp.value = null;
+    exp.valueDisplay = null;
     onChange(exp);
   };
 
@@ -24,12 +25,15 @@ const ComplexConditionExpressionListItem = ({
     const exp = expression;
     exp.compId = value;
     exp.valueInputType = EditorUtils.getInputTypeForExpression(exp.gsPropType, exp.compId);
+    exp.value = null;
+    exp.valueDisplay = null;
     onChange(exp);
   };
 
-  const handleExpressionValueChange = (value) => {
+  const handleExpressionValueChange = (value, valueDisplay) => {
     const exp = expression;
     exp.value = value;
+    exp.valueDisplay = valueDisplay;
     onChange(exp);
   };
 

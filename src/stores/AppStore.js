@@ -11,6 +11,9 @@ const initialState = {
   storyVerifyingRunnable: false,
   storyRunnable: false,
   page: 'EMPTY',
+  //
+  activeConditionDone: false,
+  activeCondition: null,
 };
 
 const AppStore = ({children}) => {

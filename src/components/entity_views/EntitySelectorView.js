@@ -11,6 +11,7 @@ const EntitySelectorView = ({
   disabled = false,
   placeholder = '',
   emptyOption = false,
+  emptyOptionLabel = '(empty)',
   customFetch = null,
   customFetchParams = null,
 }) => {
@@ -62,6 +63,14 @@ const EntitySelectorView = ({
           console.log('||--FAIL', error);
         });
         break;
+      case 'allSequencedActs':
+        AppDataFetchController.fetchSequencedActs().then((fetchedEntities) => {
+          setNameProp('name');
+          setEntities(fetchedEntities);
+        }).catch(error => {
+          console.log('||--FAIL', error);
+        });
+        break;
       default:
         break;
     }
@@ -73,7 +82,7 @@ const EntitySelectorView = ({
 
   return (
     <Select value={value} onChange={(value) => { onChangeCallback(value, getEntityName(value)) }} style={{width: '100%'}} disabled={disabled} placeholder={placeholder}>
-      {emptyOption && <Option key='empty-opt' value={-1}>(empty)</Option>}
+      {emptyOption && <Option key='empty-opt' value={-1}>{emptyOptionLabel}</Option>}
       { entities && entities.length > 0 && entities.map(entity => {
           return (<Option key={entity.id} value={entity.id}>{entity[nameProp]}</Option>);
         })

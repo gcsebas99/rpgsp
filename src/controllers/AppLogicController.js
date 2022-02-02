@@ -408,9 +408,218 @@ class AppLogicController {
     });
   }
 
-  //-- Play Mode --//
+  //---------------------------------------//
+  //-------------- Actions ----------------//
+  //---------------------------------------//
+
+  //-- Sequenced Actions --//
+  static createNewSequencedAction(dispatch, data) {
+    return db.sequenced_actions.add({'act_id': data.actId, 'order': data.order, 'text_value': data.textValue, 'type': data.type, 'character_id': data.characterId}).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static updateSequencedAction(dispatch, key, data) {
+    //do not accept order update
+    return db.sequenced_actions.update(key, {'text_value': data.textValue, 'type': data.type, 'character_id': data.characterId}).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static updateSequencedActionOrder(dispatch, key, data) {
+    return db.transaction('rw', db.sequenced_actions, async () => {
+      const affectedSequencedAction = await db.sequenced_actions.where({act_id: data.actId, order: data.order}).first();
+      await db.sequenced_actions.update(key, {'order': data.order});
+      await db.sequenced_actions.update(affectedSequencedAction.id, {'order': data.oldOrder});
+    }).then(result => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static deleteSequencedAction(dispatch, id, actId) {
+    return db.transaction('rw', db.sequenced_actions, async () => {
+      let newBaseOrder = null;
+      let affectedSequencedActions = [];
+      const sequencedActions = await db.sequenced_actions.where('act_id').equals(actId).toArray();
+      const orderedSequencedActions = sequencedActions.sort((a, b) => { return a.order - b.order; });
+      await orderedSequencedActions.forEach(action => {
+        if(newBaseOrder !== null){
+          affectedSequencedActions.push({key: action.id, order: newBaseOrder + affectedSequencedActions.length});
+        }
+        if(action.id === id){
+          newBaseOrder = action.order;
+        }
+      });
+      await db.sequenced_actions.delete(id);
+      affectedSequencedActions.forEach(async (affected) => {
+        await db.sequenced_actions.update(affected.key, {'order': affected.order});
+      });
+    }).then(result => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  //-- No-Effect Actions --//
+  static createNewNoEffectAction(dispatch, data) {
+    return db.game_actions.add({'type': 'noeff', 'description': data.description, 'required_condition': data.requiredCondition, 'allow_repeat': data.allowRepeat}).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static deleteNoEffectAction(dispatch, id) {
+    return db.game_actions.delete(id).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  //-- Conversations --//
+  static createNewConversation(dispatch, data) {
+    return db.conversations.add({'name': data.name, 'characters': ''}).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static updateConversation(dispatch, key, data) {
+    return db.conversations.update(key, {'name': data.name}).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static updateConversationCharacters(dispatch, key, data) {
+    return db.conversations.update(key, {'characters': data.characters}).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static deleteConversation(dispatch, id) {
+    return db.transaction('rw', db.conversations, db.conversation_dialogs, async () => {
+      await db.conversation_dialogs.where('conversation_id').equals(id).delete();
+      await db.conversations.delete(id);
+    }).then(result => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static createNewConversationDialog(dispatch, data) {
+    return db.transaction('rw', db.conversations, db.conversation_dialogs, async () => {
+      await db.conversation_dialogs.add({'conversation_id': data.conversationId, 'order': data.order, 'dialog': data.dialog, 'character_id': data.characterId});
+      const dialogs = await db.conversation_dialogs.where('conversation_id').equals(data.conversationId).toArray();
+      await db.conversations.update(data.conversationId, {'characters': AppLogicUtils.rebuildConversationCharacterIds(dialogs)});
+    }).then(result => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static updateConversationDialog(dispatch, key, data) {
+    return db.transaction('rw', db.conversations, db.conversation_dialogs, async () => {
+      //do not accept order update
+      await db.conversation_dialogs.update(key, {'dialog': data.dialog, 'character_id': data.characterId});
+      const dialogs = await db.conversation_dialogs.where('conversation_id').equals(data.conversationId).toArray();
+      await db.conversations.update(data.conversationId, {'characters': AppLogicUtils.rebuildConversationCharacterIds(dialogs)});
+    }).then(result => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static updateConversationDialogOrder(dispatch, key, data) {
+    return db.transaction('rw', db.conversation_dialogs, async () => {
+      const affectedConversationDialog = await db.conversation_dialogs.where({conversation_id: data.conversationId, order: data.order}).first();
+      await db.conversation_dialogs.update(key, {'order': data.order});
+      await db.conversation_dialogs.update(affectedConversationDialog.id, {'order': data.oldOrder});
+    }).then(result => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static deleteConversationDialog(dispatch, id, conversationId) {
+    return db.transaction('rw', db.conversations, db.conversation_dialogs, async () => {
+      let newBaseOrder = null;
+      let affectedConversationDialogs = [];
+      const conversationDialogs = await db.conversation_dialogs.where('conversation_id').equals(conversationId).toArray();
+      const orderedConversationDialogs = conversationDialogs.sort((a, b) => { return a.order - b.order; });
+      await orderedConversationDialogs.forEach(dialog => {
+        if(newBaseOrder !== null){
+          affectedConversationDialogs.push({key: dialog.id, order: newBaseOrder + affectedConversationDialogs.length});
+        }
+        if(dialog.id === id){
+          newBaseOrder = dialog.order;
+        }
+      });
+      await db.conversation_dialogs.delete(id);
+      affectedConversationDialogs.forEach(async (affected) => {
+        await db.conversation_dialogs.update(affected.key, {'order': affected.order});
+      });
+      const conversationDialogsAfterRemove = await db.conversation_dialogs.where('conversation_id').equals(conversationId).toArray();
+      await db.conversations.update(conversationId, {'characters': AppLogicUtils.rebuildConversationCharacterIds(conversationDialogsAfterRemove)});
+    }).then(result => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  //---------------------------------------//
+  //------------- Play Mode ---------------//
+  //---------------------------------------//
   static startNewPlayTestRun(dispatch) {
-    return db.transaction('rw', db.play_game_state_props, db.game_state_props, async () => {
+    return db.transaction('rw', db.play_game_state_props, db.game_state_props, db.default_entity_colors, db.custom_entity_defs, async () => {
+      //get default and custom colors
+      const defaultColors = await db.default_entity_colors.toArray();
+      const customEntityColors = await db.custom_entity_defs.toArray();
       //clear play_game_state_props
       await db.play_game_state_props.clear();
       //copy all game_state_props to play_game_state_props and set values to defaults and prev to null
@@ -422,6 +631,7 @@ class AppLogicController {
           'type': gsp.type,
           'value': gsp.default,
           'prev_value': null,
+          'color': AppLogicUtils.getPropRelatedColor(gsp.name, gsp.type, defaultColors, customEntityColors),
         };
       });
       await db.play_game_state_props.bulkAdd(playProps);

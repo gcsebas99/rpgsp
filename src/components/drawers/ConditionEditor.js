@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Drawer, Form, Button, Col, Row, Space, List, Typography, Tabs, Tag } from 'antd';
 import { CaretLeftOutlined } from '@ant-design/icons';
-//import { AppContext } from '../../stores/AppStore';
+import { AppContext } from '../../stores/AppStore';
 import ComplexConditionExpressionListItem from '../entity_views/ComplexConditionExpressionListItem';
 import EditorUtils from '../../utils/EditorUtils';
 //import AppLogicController from '../../controllers/AppLogicController';
@@ -17,10 +17,11 @@ const { Text } = Typography;
 const conditionCaret = <CaretLeftOutlined key='caret' style={{color: '#fa541c'}} />;
 let engine;
 
-const ConditionEditor = ({ condition = null, isDrawerVisible, onDrawerClose }) => {
-  //const [,dispatch] = useContext(AppContext);
+const ConditionEditor = ({ isDrawerVisible, onDrawerClose }) => {
+  const [state, dispatch] = useContext(AppContext);
   const [form] = Form.useForm();
   const [visible, setVisible] = useState(false);
+  const [condition, setCondition] = useState(null);
   const [conditionType, setConditionType] = useState('1'); //1 => single, 2 => complex
   const [validCondition, setValidCondition] = useState(false);
   //single expression
@@ -46,12 +47,8 @@ const ConditionEditor = ({ condition = null, isDrawerVisible, onDrawerClose }) =
     if(isDrawerVisible) { //opening drawer
       resetEditor();
       form.resetFields();
-
-      if (condition) {
-        //set type accordingly
-      } else {
-        setConditionType('1');
-      }
+      setCondition(state.activeCondition);
+      fillConditionValues();
       engine = new ConditionEngine();
       openDrawer();
     }
@@ -73,6 +70,55 @@ const ConditionEditor = ({ condition = null, isDrawerVisible, onDrawerClose }) =
     setValidCondition(false);
   };
 
+  const fillConditionValues = () => {
+    if (condition !== null) {
+      if(condition.mode === 'simple') {
+        setConditionType('1');
+        fillSingleCondition();
+      } else {
+        setConditionType('2');
+        fillComplexCondition();
+      }
+    } else {
+      setConditionType('1');
+    }
+  };
+
+  const fillSingleCondition = () => {
+    const condExpression = condition.expressions[0];
+    const exp = singleExpression;
+    const gameStateProp = gameStates.find(gameState => gameState.id === condExpression.gsp_id);
+    exp.gsProp = gameStateProp.name;
+    exp.gsPropType = gameStateProp.type;
+    exp.comp = null;
+    exp.compId = condExpression.compId;
+    exp.valueInputType = EditorUtils.getInputTypeForExpression(exp.gsPropType, exp.compId);
+    exp.value = condExpression.value;
+    exp.valueDisplay = condExpression.valueDisplay;
+    setSingleExpression({ ...exp });
+    setValidCondition(false);
+  };
+
+  const fillComplexCondition = () => {
+    let gameStateProp;
+    let exp;
+    let newComplexConditionExpressions = [];
+    setComplexCondition(condition.logic_func);
+    condition.expressions.forEach(condExpression => {
+      gameStateProp = gameStates.find(gameState => gameState.id === condExpression.gsp_id);
+      exp = EditorUtils.getEmptyExpression(condExpression.name);
+      exp.gsProp = gameStateProp.name;
+      exp.gsPropType = gameStateProp.type;
+      exp.comp = null;
+      exp.compId = condExpression.compId;
+      exp.valueInputType = EditorUtils.getInputTypeForExpression(exp.gsPropType, exp.compId);
+      exp.value = condExpression.value;
+      exp.valueDisplay = condExpression.valueDisplay;
+      newComplexConditionExpressions.push(exp);
+    });
+    setComplexConditionExpressions(newComplexConditionExpressions);
+  };
+
   //single cond
   const handleSingleCondGSPropChange = (value) => {
     const exp = singleExpression;
@@ -83,6 +129,7 @@ const ConditionEditor = ({ condition = null, isDrawerVisible, onDrawerClose }) =
     exp.compId = null;
     exp.valueInputType = null;
     exp.value = null;
+    exp.valueDisplay = null;
     setSingleExpression({ ...exp });
     setValidCondition(false);
   };
@@ -91,13 +138,16 @@ const ConditionEditor = ({ condition = null, isDrawerVisible, onDrawerClose }) =
     const exp = singleExpression;
     exp.compId = value;
     exp.valueInputType = EditorUtils.getInputTypeForExpression(exp.gsPropType, exp.compId);
+    exp.value = null;
+    exp.valueDisplay = null;
     setSingleExpression({ ...exp });
     setValidCondition(false);
   };
 
-  const handleSingleCondValueChange = (value) => {
+  const handleSingleCondValueChange = (value, valueDisplay) => {
     const exp = singleExpression;
     exp.value = value;
+    exp.valueDisplay = valueDisplay;
     setSingleExpression({ ...exp });
     setValidCondition(false);
   };
@@ -215,23 +265,60 @@ const ConditionEditor = ({ condition = null, isDrawerVisible, onDrawerClose }) =
     return true;
   };
 
+  const buildExpressions = () => {
+    let gameStateProp;
+    if (conditionType === '1') {
+      gameStateProp = gameStates.find(gameState => gameState.name === singleExpression.gsProp);
+      return [{gsp_id: gameStateProp.id, compId: singleExpression.compId, value: singleExpression.value, valueDisplay: singleExpression.valueDisplay}];
+    } else {
+      let expressions = [];
+      complexConditionExpressions.forEach(expression => {
+        gameStateProp = gameStates.find(gameState => gameState.name === expression.gsProp);
+        expressions.push({gsp_id: gameStateProp.id, compId: expression.compId, value: expression.value, valueDisplay: expression.valueDisplay, name: expression.name});
+      });
+      return expressions;
+    }
+  };
+
+  const buildDisplayCondition = () => {
+    let comparator;
+    let valueDisplay;
+    if (conditionType === '1') {
+      comparator = EditorUtils.getComparatorName(singleExpression.compId);
+      valueDisplay = singleExpression.valueDisplay !== null ? singleExpression.valueDisplay : singleExpression.value;
+      return [{type: 'exp', propName: singleExpression.gsProp, comp: comparator, value: valueDisplay}]
+    } else {
+      let exp;
+      let displayExp;
+      let expressions = [];
+      complexCondition.forEach(condition => {
+        if(condition.type === 'exp') {
+          exp = complexConditionExpressions.find(condExp => condExp.name === condition.name);
+          comparator = EditorUtils.getComparatorName(exp.compId);
+          valueDisplay = exp.valueDisplay !== null ? exp.valueDisplay : exp.value;
+          displayExp = {type: 'exp', propName: exp.gsProp, comp: comparator, value: valueDisplay};
+        } else if (condition.type === 'logic') {
+          displayExp = {type: 'logic', name: condition.displayName};
+        } else { // type === 'grouping'
+          displayExp = {type: 'grouping', name: condition.displayName};
+        }
+        expressions.push(displayExp);
+      });
+      return expressions;
+    }
+  };
+
   const onFinish = (values) => {
-    // const name = values.name.trim();
-    // const key = values.key.trim();
-    // const singular = values.singular.trim();
-    // if(name === '' || singular === ''){
-    //   closeDrawer();
-    //   message.error('Do not leave empty fields, sorry :(');
-    //   return;
-    // }
-    // const data = {name, key, singular};
-    // AppLogicController.createNewCustomEntityDef(dispatch, data).then(result => {
-    //   closeDrawer();
-    //   message.success('New entity created!');
-    // }).catch(error => {
-    //   closeDrawer();
-    //   message.error('Something went wrong, sorry :(');
-    // });
+    let result = {
+      mode: (conditionType === '1') ? 'simple' : 'complex',
+      expressions: buildExpressions(),
+      display: buildDisplayCondition(),
+    };
+    if (conditionType === '2') {
+      result.logic_func = complexCondition;
+    }
+    dispatch({type: 'SET_ACTIVE_CONDITION_COMPLETED', payload: result});
+    closeDrawer();
   };
 
   //renders
@@ -286,7 +373,7 @@ const ConditionEditor = ({ condition = null, isDrawerVisible, onDrawerClose }) =
             Validate
           </Button>
           <Button type="primary" htmlType="submit" form='add-edit-condition-id' disabled={!validCondition}>
-            {(condition === null) ? 'Create' : 'Update'}
+            {(condition === null) ? 'Set' : 'Update'}
           </Button>
         </div>
       }

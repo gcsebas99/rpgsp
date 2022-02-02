@@ -54,6 +54,24 @@ const AppReducer = (state, action) => {
         storyVerifyingRunnable: false,
         storyRunnable: true,
       };
+    case 'UNSET_ACTIVE_CONDITION':
+      return {
+        ...state,
+        activeConditionDone: false,
+        activeCondition: null,
+      };
+    case 'SET_ACTIVE_CONDITION':
+      return {
+        ...state,
+        activeConditionDone: false,
+        activeCondition: action.payload,
+      };
+    case 'SET_ACTIVE_CONDITION_COMPLETED':
+      return {
+        ...state,
+        activeConditionDone: true,
+        activeCondition: action.payload,
+      };
 
     // case 'ADD_POST':
     //     return {
