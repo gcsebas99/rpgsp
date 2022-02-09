@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TitledCard from '../ui/TitledCard';
 import { PlusCircleFilled, MinusCircleFilled } from '@ant-design/icons';
 import { Collapse, Descriptions } from 'antd';
@@ -9,6 +9,19 @@ const { Item } = Descriptions;
 
 const GameStatePropInspectorView = ({ gsProp, ...props }) => {
   const [extraOpen, setExtraOpen] = useState(false);
+  const [updated, setUpdated] = useState(false);
+
+  useEffect(() => {
+    //console.log('||--gsProp.value CHANGE', gsProp.value);
+    pingUpdated();
+  }, [gsProp.value]);
+
+  const pingUpdated = () => {
+    setUpdated(true);
+    setTimeout(() => {
+      setUpdated(false);
+    }, 40);
+  };
 
   const formatValue = (value, type) => {
     if (value === null || value === undefined) return '--empty--';
@@ -27,7 +40,7 @@ const GameStatePropInspectorView = ({ gsProp, ...props }) => {
 
   return (
     <TitledCard 
-      className="game-state-prop-inspector-view"
+      className={`game-state-prop-inspector-view ${updated ? 'updated' : ''}`}
       title={gsProp.name} 
       titleStyle={{fontSize: 13}} 
       style={{marginBottom: 12, borderColor: gsProp.color}}

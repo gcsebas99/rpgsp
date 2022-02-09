@@ -52,6 +52,14 @@ class ConditionEditorUtils {
   }
 
   static renderConditionDisplay(condition) {
+    const displayExpressionValue = value => {
+      if(typeof value === 'boolean'){
+        return value ? 'TRUE' : 'FALSE';
+      } else {
+        return value;
+      }
+    };
+
     if (condition !== null && condition.display) {
       let color;
       let display;
@@ -62,7 +70,7 @@ class ConditionEditorUtils {
           display = expression.name;
         } else {
           let cmp = (<strong style={{color: '#333333'}}>{expression.comp}</strong>);
-          display = (<>{expression.propName} {cmp} {expression.value}</>);
+          display = (<>{expression.propName} {cmp} {displayExpressionValue(expression.value)}</>);
         }
         expressions.push(<Tag key={index} color={color}>{display}</Tag>);
       });

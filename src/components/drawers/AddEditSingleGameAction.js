@@ -21,11 +21,11 @@ const AddEditSingleGameAction = ({ gameAction = null, type = 'inter', isDrawerVi
       form.resetFields();
       if (gameAction) {
         setAllowRepeat(gameAction.allow_repeat);
-        form.setFieldsValue({allowRepeat: gameAction.allow_repeat});
-        setRequiredCondition(gameAction.required_condition);
+        form.setFieldsValue({allowRepeat: gameAction.allow_repeat, description: gameAction.description});
+        setRequiredCondition(JSON.parse(gameAction.required_condition));
       } else {
         setAllowRepeat(true);
-        form.setFieldsValue({allowRepeat: true});
+        form.setFieldsValue({allowRepeat: true, description: ''});
         setRequiredCondition(null);
       }
       openDrawer();
@@ -64,9 +64,7 @@ const AddEditSingleGameAction = ({ gameAction = null, type = 'inter', isDrawerVi
       message.error('Please set a valid required condition');
       return;
     }
-
     const data = {'description': description, allowRepeat: values.allowRepeat, requiredCondition: JSON.stringify(requiredCondition)};
-    console.log('storing', data);
     if (gameAction === null) { //new gameAction
       AppLogicController.createNewNoEffectAction(dispatch, data).then(result => {
         closeDrawer();
@@ -76,13 +74,13 @@ const AddEditSingleGameAction = ({ gameAction = null, type = 'inter', isDrawerVi
         message.error('Something went wrong, sorry :(');
       });
     } else { //editing gameAction
-    //   AppLogicController.updateConversation(dispatch, conversation.id, data).then(result => {
-    //     closeDrawer();
-    //     message.success('Conversation edited!');
-    //   }).catch(error => {
-    //     closeDrawer();
-    //     message.error('Something went wrong, sorry :(');
-    //   });
+      AppLogicController.updateNoEffectAction(dispatch, gameAction.id, data).then(result => {
+        closeDrawer();
+        message.success('Action edited!');
+      }).catch(error => {
+        closeDrawer();
+        message.error('Something went wrong, sorry :(');
+      });
     }
   };
 

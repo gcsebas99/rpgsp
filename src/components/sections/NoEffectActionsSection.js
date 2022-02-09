@@ -14,23 +14,18 @@ const { Text } = Typography;
 const NoEffectActionsSection = ({ sectionActive, onAddEditCondition }) => {
   const [,dispatch] = useContext(AppContext);
   const [addEditSingleActionVisible, setAddEditSingleActionVisible] = useState(false);
-  // const [characters, setCharacters] = useState(null);
-  // const [currentActId, setCurrentActId] = useState(null);
-  // const [currentSequencedAction, setCurrentSequencedAction] = useState(null);
-  // const [addEditSequencedActionVisible, setAddEditSequencedActionVisible] = useState(false);
-  // //live
-  // const act = useLiveQuery(AppDataFetchController.fetchLiveAct(currentActId), [currentActId]);
-  // const chapter = useLiveQuery(AppDataFetchController.fetchLiveChapter(act && act.chapter_id), [act]);
-  // const actSequencedActions = useLiveQuery(AppDataFetchController.fetchLiveSequencedActionsByAct(currentActId), [currentActId]);
+  const [currentNoEffectAction, setCurrentNoEffectAction] = useState(null);
   //live
   const noeffActions = useLiveQuery(AppDataFetchController.fetchLiveNoEffectActions({}));
 
   const addNoEffectAction = () => {
+    setCurrentNoEffectAction(null);
     setAddEditSingleActionVisible(true);
   };
 
-  const editNoEffectAction = () => {
-    //setAddEditSingleActionVisible(true);
+  const editNoEffectAction = (noeffAction) => {
+    setCurrentNoEffectAction(noeffAction);
+    setAddEditSingleActionVisible(true);
   };
 
   const removeNoEffectAction = (noeffAction) => {
@@ -97,7 +92,7 @@ const NoEffectActionsSection = ({ sectionActive, onAddEditCondition }) => {
         </Col>
       </Row>
       <AddEditSingleGameAction 
-        gameAction={null}
+        gameAction={currentNoEffectAction}
         type='noeff'
         isDrawerVisible={addEditSingleActionVisible} 
         onDrawerClose={() => { setAddEditSingleActionVisible(false); }} 

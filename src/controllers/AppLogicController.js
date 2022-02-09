@@ -486,6 +486,16 @@ class AppLogicController {
     });
   }
 
+  static updateNoEffectAction(dispatch, key, data) {
+    return db.game_actions.update(key, {'type': 'noeff', 'description': data.description, 'required_condition': data.requiredCondition, 'allow_repeat': data.allowRepeat}).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
   static deleteNoEffectAction(dispatch, id) {
     return db.game_actions.delete(id).then(() => {
       //
