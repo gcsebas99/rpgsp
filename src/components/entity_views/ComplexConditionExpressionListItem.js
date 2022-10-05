@@ -6,6 +6,7 @@ const ComplexConditionExpressionListItem = ({
   expression,
   gameStates,
   onChange,
+  disabled = false,
 }) => {
 
   const handleExpressionGSPropChange = (value) => {
@@ -43,13 +44,13 @@ const ComplexConditionExpressionListItem = ({
       <Row gutter={[24, 8]} style={{width: '100%'}}>
         <Col span={4}>{expression.name}</Col>
         <Col span={7}>
-          {ConditionEditorUtils.renderGameStatePropsSelector(expression.gsProp, handleExpressionGSPropChange, gameStates)}
+          {ConditionEditorUtils.renderGameStatePropsSelector(expression.gsProp, handleExpressionGSPropChange, gameStates, disabled)}
         </Col>
         <Col span={6} style={{display: (expression.gsProp !== null ? 'block' : 'none')}}>
-          {ConditionEditorUtils.renderComparatorSelector(expression.gsPropType, expression.compId, handleExpressionComparatorChange)}
+          {ConditionEditorUtils.renderComparatorSelector(expression.gsPropType, expression.compId, handleExpressionComparatorChange, disabled)}
         </Col>
         <Col span={7} style={{display: (expression.compId !== null && expression.compId !== 'IS_EMPTY' ? 'block' : 'none')}}>
-          {ConditionEditorUtils.renderValueSelector(expression.gsPropType, expression.valueInputType, expression.value, handleExpressionValueChange)}
+          {ConditionEditorUtils.renderValueSelector(expression.gsPropType, expression.valueInputType, expression.value, handleExpressionValueChange, disabled)}
         </Col>
       </Row>
     </List.Item>

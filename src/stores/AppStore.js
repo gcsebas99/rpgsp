@@ -10,10 +10,17 @@ const initialState = {
   storyLoaded: false,
   storyVerifyingRunnable: false,
   storyRunnable: false,
+  storyVerifications: {},
   page: 'EMPTY',
   //
   activeConditionDone: false,
   activeCondition: null,
+  conditionEditorMode: null,
+  //
+  activeEffectsDone: false,
+  activeEffects: null,
+  //
+  runConfigurations: {},
 };
 
 const AppStore = ({children}) => {

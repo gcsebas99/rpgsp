@@ -15,12 +15,13 @@ const AddEditArea = ({ area = null, location, isDrawerVisible, onDrawerClose }) 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [color, setColor] = useState(DefaultColor);
+  const [sound, setSound] = useState(null);
 
   useEffect(() => {
     if(isDrawerVisible) { //opening drawer
       form.resetFields();
       if (area) {
-        form.setFieldsValue({name: area.name, description: area.description});
+        form.setFieldsValue({name: area.name, description: area.description, sound: area.sound});
         setColor(area.color);
       } else {
         setColor(DefaultColor);
@@ -38,15 +39,28 @@ const AddEditArea = ({ area = null, location, isDrawerVisible, onDrawerClose }) 
     onDrawerClose && onDrawerClose();
   };
 
+  const isValidSound = (sound) => {
+    return !!sound.match(/\w+\.(mp3)$/gi);
+  };
+
   const onFinish = (values) => {
     const name = values.name.trim();
     const description = values.description.trim();
+    let sound = values.sound.trim();
     if(name === '' || description === ''){
       closeDrawer();
       message.error('Do not leave empty fields, sorry :(');
       return;
     }
-    let data = {name, description, color};
+    if(sound && sound.length > 0) {
+      if(!isValidSound(sound)) {
+        message.error('Sound does not appear to have a valid format :(');
+        return;
+      }
+    } else {
+      sound = null;
+    }
+    let data = {name, description, color, sound};
     if (area === null) { //new area
       data.location_id = location.id;
       AppLogicController.createNewArea(dispatch, data).then(result => {
@@ -118,6 +132,17 @@ const AddEditArea = ({ area = null, location, isDrawerVisible, onDrawerClose }) 
               color={color}
               onChange={(colors) => { setColor(colors.color) }}
             />
+          </Col>
+        </Row>
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="sound"
+              label="Sound (optional)"
+              rules={[{ required: false}]}
+            >
+              <Input placeholder="Enter audio url (mp3 only)" value={sound} onChange={(e) => { setSound(e.target.value) }} />
+            </Form.Item>
           </Col>
         </Row>
       </Form>

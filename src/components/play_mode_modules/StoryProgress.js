@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Card, Typography, Row, Col, Progress } from 'antd';
 import AppDataFetchController from '../../controllers/AppDataFetchController';
 import ConversionUtils from '../../utils/ConversionUtils';
+import CFElement from '../ui/CFElement';
 const { Title, Text } = Typography;
 
 const StoryProgress = () => {
@@ -34,9 +35,10 @@ const StoryProgress = () => {
     }).catch(error => { });
   }, [chapter]);
 
+  //<Title level={5}>Progress</Title>
   return (
     <Card>
-      <Title level={5}>Progress</Title>
+      <CFElement Element={Title} level={5}>Progress</CFElement>
       <Row gutter={[8, 8]}>
         <Col span={24} style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
           <Progress percent={(chapter/chaptersCount)*100} format={percent => `${chapter}/${chaptersCount}`} strokeColor='#fa541c' />

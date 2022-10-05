@@ -1,6 +1,7 @@
 import db, { testDatabase } from '../db/AppDatabase';
 import AppLogicUtils from '../utils/AppLogicUtils';
 import LocationMapUtils from '../utils/LocationMapUtils';
+import ConditionEditorUtils from '../utils/ConditionEditorUtils';
 
 //Controls modifications in app state and database
 class AppLogicController {
@@ -51,7 +52,7 @@ class AppLogicController {
   }
 
   static updateGameStateProp(dispatch, key, data) {
-    return db.game_state_props.update(key, {'name': data.name, 'type': data.type, 'default': data.defaultValue, 'edit_mode': data.editMode, 'removable': data.removable}).then(() => {
+    return db.game_state_props.update(key, {'name': data.name, 'type': data.type, 'default': data.defaultValue, 'default_table': data.defaultTable || null, 'default_tids': data.defaultTids || null, 'edit_mode': data.editMode, 'removable': data.removable}).then(() => {
       //
     }).catch(error => {
       console.log('||--FAIL', error);
@@ -115,7 +116,7 @@ class AppLogicController {
   }
 
   static createNewArea(dispatch, data) {
-    return db.areas.add({'location_id': data.location_id, 'name': data.name, 'description': data.description, 'color': data.color}).then(() => {
+    return db.areas.add({'location_id': data.location_id, 'name': data.name, 'description': data.description, 'color': data.color, 'sound': data.sound}).then(() => {
       //
     }).catch(error => {
       console.log('||--FAIL', error);
@@ -125,7 +126,7 @@ class AppLogicController {
   }
 
   static updateArea(dispatch, key, data) {
-    return db.areas.update(key, {'name': data.name, 'description': data.description, 'color': data.color}).then(() => {
+    return db.areas.update(key, {'name': data.name, 'description': data.description, 'color': data.color, 'sound': data.sound}).then(() => {
       //
     }).catch(error => {
       console.log('||--FAIL', error);
@@ -170,7 +171,7 @@ class AppLogicController {
 
   //-- Character --//
   static createNewCharacter(dispatch, data) {
-    return db.characters.add({'name': data.name, 'description': data.description, 'is_pc': data.isPC, 'color': data.color}).then(() => {
+    return db.characters.add({'name': data.name, 'description': data.description, 'is_pc': data.isPC, 'color': data.color, 'image': data.image}).then(() => {
       //
     }).catch(error => {
       console.log('||--FAIL', error);
@@ -180,7 +181,7 @@ class AppLogicController {
   }
 
   static updateCharacter(dispatch, key, data) {
-    return db.characters.update(key, {'name': data.name, 'description': data.description, 'is_pc': data.isPC, 'color': data.color}).then(() => {
+    return db.characters.update(key, {'name': data.name, 'description': data.description, 'is_pc': data.isPC, 'color': data.color, 'image': data.image}).then(() => {
       //
     }).catch(error => {
       console.log('||--FAIL', error);
@@ -377,6 +378,17 @@ class AppLogicController {
     });
   }
 
+  static updateActEndCondition(dispatch, key, data) {
+    console.log('||--updateActEndCondition', data);
+    return db.acts.update(key, {'end_condition': data.endCondition}).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
   static deleteAct(dispatch, id, chapter_id) {
     return db.transaction('rw', db.acts, async () => {
       let newBaseOrder = null;
@@ -475,6 +487,153 @@ class AppLogicController {
     });
   }
 
+  //-- Navigation Actions --//
+  static createNavigationActions(dispatch, data) {
+    const twoActions = data.builderData.twoWay;
+    let action1 = null;
+    let action1Effects;
+    let action2 = null;
+    let action2Effects;
+
+    return db.transaction('rw', db.game_actions, db.effects, db.nav_action_builders, async () => {
+      //create action(s)
+      action1 = await db.game_actions.add({'type': 'nav', 'description': data.actions[0].description, 'allow_repeat': data.actions[0].allowRepeat, 'required_condition': data.actions[0].requiredCondition, 'effects_display': data.actions[0].effectsDisplay});
+      if(twoActions) {
+        action2 = await db.game_actions.add({'type': 'nav', 'description': data.actions[1].description, 'allow_repeat': data.actions[1].allowRepeat, 'required_condition': data.actions[1].requiredCondition, 'effects_display': data.actions[1].effectsDisplay});
+      }
+      //create effects for each action
+      action1Effects = data.actions[0].effects.map((effect) => { effect.actionId = action1; return effect; });
+      await AppLogicController.createNewEffectsList(dispatch, action1Effects);
+      if(twoActions) {
+        action2Effects = data.actions[1].effects.map((effect) => { effect.actionId = action2; return effect; });
+        await AppLogicController.createNewEffectsList(dispatch, action2Effects);
+      }
+      //create builder
+      await db.nav_action_builders.add({'nav1_id': action1, 'nav2_id': action2, 'area1': data.builderData.area1, 'area2': data.builderData.area2, 'two_way': data.builderData.twoWay});
+    }).then(result => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static deleteNavigationActions(dispatch, id) {
+    return db.transaction('rw', db.game_actions, db.effects, db.nav_action_builders, async () => {
+      let ids = [];
+      const nav_action_builder = await db.nav_action_builders.where({id: id}).first();
+      ids.push(nav_action_builder.nav1_id);
+      if(nav_action_builder.two_way) { ids.push(nav_action_builder.nav2_id); }
+      const nav_actions = await db.game_actions.where('id').anyOf(ids).toArray();
+      //delete effects and actions
+      await AppLogicController.deleteEffectsByActionId(dispatch, nav_actions[0].id);
+      await db.game_actions.where('id').equals(nav_actions[0].id).delete();
+      if(nav_action_builder.two_way) {
+        await AppLogicController.deleteEffectsByActionId(dispatch, nav_actions[1].id);
+        await db.game_actions.where('id').equals(nav_actions[1].id).delete();
+      }
+      //delete builder
+      await db.nav_action_builders.delete(id);
+    }).then(result => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  //-- Interactive Actions --//
+  static createNewInteractiveAction(dispatch, data) {
+    let action = null;
+    let noEffAction = null;
+    let actionEffects;
+
+    return db.transaction('rw', db.game_actions, db.effects, db.action_assoc, async () => {
+      //create action and effects
+      action = await db.game_actions.add({'type': 'inter', 'description': data.description, 'allow_repeat': data.allowRepeat, 'required_condition': data.requiredCondition, 'effects_display': data.actionEffects.json_display});
+      actionEffects = data.actionEffects.effects.map((effect) => { effect.actionId = action; return effect; });
+      await AppLogicController.createNewEffectsList(dispatch, actionEffects);
+      if (data.hasAssociated) {
+        //create new no-eff or associate existing
+        let oppositeCond = ConditionEditorUtils.createOppositeCondition(JSON.parse(data.requiredCondition));
+        if(data.associationType === 'create') {
+          //create action
+          noEffAction = await db.game_actions.add({'type': 'noeff', 'description': '[INVERSE OF: '+data.description+']', 'allow_repeat': data.allowRepeat, 'required_condition': JSON.stringify(oppositeCond)});
+        } else {
+          //update action req condition
+          await AppLogicController.updateNoEffectActionCondition(dispatch, data.associationTo, {requiredCondition: JSON.stringify(oppositeCond)});
+          noEffAction = data.associationTo;
+        }
+        //create action_assoc
+        await db.action_assoc.add({'action1_id': action, 'action2_id': noEffAction});
+      }
+    }).then(result => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static deleteInteractiveAction(dispatch, id) {
+    return db.transaction('rw', db.game_actions, db.effects, db.action_assoc, async () => {
+      //delete effects
+      await AppLogicController.deleteEffectsByActionId(dispatch, id);
+      //find assoc
+      const assoc = await db.action_assoc.where('action1_id').equals(id).first();
+      if(assoc) {
+        //delete no eff and assoc
+        await AppLogicController.deleteNoEffectAction(dispatch, assoc.action2_id);
+        await db.action_assoc.where('action1_id').equals(id).delete();
+      }
+      //delete action
+      await db.game_actions.where('id').equals(id).delete();
+    }).then(result => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  //-- Effects --//
+  static createNewEffectsList(dispatch, data) {
+    const effects = data.map(effect => {
+      return {
+        'action_id': effect.actionId,
+        'order': effect.order, 
+        'type': effect.type,
+        'gsp_id': effect.gsp_id || null,
+        'mutator': effect.mutatorId || null,
+        'value': effect.value || null,
+        'conv_id': effect.conv_id || null,
+        'conv_at': effect.conv_at || null,
+      };
+    });
+    return db.effects.bulkAdd(effects).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static deleteEffectsByActionId(dispatch, id) {
+    return db.effects.where('action_id').equals(id).delete().then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+
   //-- No-Effect Actions --//
   static createNewNoEffectAction(dispatch, data) {
     return db.game_actions.add({'type': 'noeff', 'description': data.description, 'required_condition': data.requiredCondition, 'allow_repeat': data.allowRepeat}).then(() => {
@@ -488,6 +647,16 @@ class AppLogicController {
 
   static updateNoEffectAction(dispatch, key, data) {
     return db.game_actions.update(key, {'type': 'noeff', 'description': data.description, 'required_condition': data.requiredCondition, 'allow_repeat': data.allowRepeat}).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
+  static updateNoEffectActionCondition(dispatch, key, data) {
+    return db.game_actions.update(key, {'required_condition': data.requiredCondition}).then(() => {
       //
     }).catch(error => {
       console.log('||--FAIL', error);
@@ -622,6 +791,17 @@ class AppLogicController {
     });
   }
 
+  //-- Run Configurations --//
+  static setRunConfiguration(dispatch, data) {
+    return db.run_configurations.put({'name': data.name, 'value': data.value}, data.name).then(() => {
+      //
+    }).catch(error => {
+      console.log('||--FAIL', error);
+      //return reject to allow catch chain
+      return Promise.reject(error);
+    });
+  }
+
   //---------------------------------------//
   //------------- Play Mode ---------------//
   //---------------------------------------//
@@ -639,8 +819,11 @@ class AppLogicController {
           'game_state_prop_id': gsp.id,
           'name': gsp.name, 
           'type': gsp.type,
+          'ref_table': gsp.default_table,
           'value': gsp.default,
           'prev_value': null,
+          'tids': gsp.default_tids,
+          'prev_tids': null,
           'color': AppLogicUtils.getPropRelatedColor(gsp.name, gsp.type, defaultColors, customEntityColors),
         };
       });

@@ -5,6 +5,7 @@ import { CloseCircleOutlined, CheckCircleOutlined, LoadingOutlined } from '@ant-
 import PlayActions from '../PlayActions';
 import PlaytestConfigurationSection from '../sections/PlaytestConfigurationSection';
 import StoryValidationSection from '../sections/StoryValidationSection';
+import CustomizePlaytestSection from '../sections/CustomizePlaytestSection';
 import '../../styles/components/pages/PlayModePage.scss';
 
 const { Content } = Layout;
@@ -50,6 +51,9 @@ const PlayModePage = () => {
           </TabPane>
           <TabPane tab={shouldRenderTabTitle && renderValidationTabTitle()} key="2">
             <StoryValidationSection />
+          </TabPane>
+          <TabPane tab="Customize playtest" key="3">
+            <CustomizePlaytestSection />
           </TabPane>
         </Tabs>
       </Content>

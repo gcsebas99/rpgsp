@@ -93,6 +93,7 @@ const StorylineSection = ({ onAddEditCondition }) => {
           onAddAct={(totalActs) => { addAct(chapter, totalActs) }} 
           onEditAct={(act) => { editAct(act, chapter) }}
           onRemoveAct={(act) => { removeAct(act, chapter) }}
+          onAddEditCondition={onAddEditCondition}
         />
         )
       }

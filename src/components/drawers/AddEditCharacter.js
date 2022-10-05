@@ -16,12 +16,13 @@ const AddEditCharacter = ({ character = null, isDrawerVisible, onDrawerClose }) 
   const [description, setDescription] = useState('');
   const [isPC, setIsPC] = useState(false);
   const [color, setColor] = useState(DefaultColor);
+  const [image, setImage] = useState(null);
 
   useEffect(() => {
     if(isDrawerVisible) { //opening drawer
       form.resetFields();
       if (character) {
-        form.setFieldsValue({name: character.name, description: character.description, isPC: character});
+        form.setFieldsValue({name: character.name, description: character.description, isPC: character, image: character.image});
         setIsPC(character.is_pc);
         setColor(character.color);
       } else {
@@ -41,16 +42,28 @@ const AddEditCharacter = ({ character = null, isDrawerVisible, onDrawerClose }) 
     onDrawerClose && onDrawerClose();
   };
 
+  const isValidImage = (image) => {
+    return !!image.match(/\w+\.(jpg|jpeg|png)$/gi);
+  };
+
   const onFinish = (values) => {
     const name = values.name.trim();
     const description = values.description.trim();
+    let image = values.image.trim();
     const isPC = values.isPC;
     if(name === '' || description === ''){
-      closeDrawer();
       message.error('Do not leave empty fields, sorry :(');
       return;
     }
-    const data = {name, description, isPC, color};
+    if(image && image.length > 0) {
+      if(!isValidImage(image)) {
+        message.error('Image does not appear to have a valid format :(');
+        return;
+      }
+    } else {
+      image = null;
+    }
+    const data = {name, description, isPC, color, image};
     if (character === null) { //new character
       AppLogicController.createNewCharacter(dispatch, data).then(result => {
         closeDrawer();
@@ -121,6 +134,17 @@ const AddEditCharacter = ({ character = null, isDrawerVisible, onDrawerClose }) 
               color={color}
               onChange={(colors) => { setColor(colors.color) }}
             />
+          </Col>
+        </Row>
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="image"
+              label="Image (optional)"
+              rules={[{ required: false}]}
+            >
+              <Input placeholder="Enter image url (png/jpeg)" value={image} onChange={(e) => { setImage(e.target.value) }} />
+            </Form.Item>
           </Col>
         </Row>
         <Row gutter={16}>

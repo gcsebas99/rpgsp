@@ -5,11 +5,13 @@ import { Layout, Typography, Spin, Row, Col } from 'antd';
 import { AppContext } from './stores/AppStore';
 //-- Controller --//
 import AppLogicController from './controllers/AppLogicController';
+import AppDataFetchController from './controllers/AppDataFetchController';
 //-- Modules --//
+import GameRunner from './components/play_mode_modules/GameRunner';
 import GameStatePropsInspector from './components/play_mode_modules/GameStatePropsInspector';
-import SequenceActionsRunner from './components/play_mode_modules/SequenceActionsRunner';
 import MapView from './components/play_mode_modules/MapView';
 import StoryProgress from './components/play_mode_modules/StoryProgress';
+import Tools from './components/play_mode_modules/Tools';
 //-- Images --//
 import logo from './images/logo192.png';
 
@@ -23,6 +25,7 @@ const PlayTestAppLayout = () => {
     //Mount
     AppLogicController.checkDatabaseOk(dispatch);
     AppLogicController.checkStoryLoaded(dispatch);
+    AppDataFetchController.loadRunConfigurations(dispatch);
 
   }, []); // eslint-disable-line
 
@@ -72,9 +75,10 @@ const PlayTestAppLayout = () => {
             <GameStatePropsInspector />
           </Col>
           <Col span={11} className='layout-col col-c'>
-            <SequenceActionsRunner />
+            <GameRunner />
           </Col>
           <Col span={7} className='layout-col col-r'>
+            <Tools />
             <MapView />
             <StoryProgress />
           </Col>

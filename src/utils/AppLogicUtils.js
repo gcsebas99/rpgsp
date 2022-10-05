@@ -81,10 +81,15 @@ class AppLogicUtils {
         }else{
           singular = type;
         }
-        console.log('||--singular', singular);
         return customEntColors.find(custom_def => custom_def.singular_name === singular).color;
     }
-    return '#fa541c';
+  }
+
+  static getStoryVerifications() {
+    return {
+      oneLocationOneArea: false,
+      oneCharacter: false,
+    };
   }
 
 }

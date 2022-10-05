@@ -14,6 +14,7 @@ const EntitySelectorView = ({
   emptyOptionLabel = '(empty)',
   customFetch = null,
   customFetchParams = null,
+  multiple = false,
 }) => {
   const [entities, setEntities] = useState([]);
   const [nameProp, setNameProp] = useState('name');
@@ -80,8 +81,32 @@ const EntitySelectorView = ({
     return (id !== -1) ? entities.find(entity => entity.id === id).name : '';
   };
 
+  const getEntitiesName = (values) => {
+    let names = [];
+    values.forEach(value => {
+      names.push(getEntityName(value));
+    });
+    return names;
+  };
+
+
+  const handleOnChange = (value) => {
+    if(multiple) {
+      onChangeCallback(value, getEntitiesName(value));
+    } else {
+      onChangeCallback(value, getEntityName(value));
+    }
+  };
+
   return (
-    <Select value={value} onChange={(value) => { onChangeCallback(value, getEntityName(value)) }} style={{width: '100%'}} disabled={disabled} placeholder={placeholder}>
+    <Select 
+      value={value} 
+      onChange={handleOnChange}
+      style={{width: '100%'}} 
+      disabled={disabled} 
+      placeholder={placeholder}
+      mode={multiple ? 'multiple' : undefined}
+    >
       {emptyOption && <Option key='empty-opt' value={-1}>{emptyOptionLabel}</Option>}
       { entities && entities.length > 0 && entities.map(entity => {
           return (<Option key={entity.id} value={entity.id}>{entity[nameProp]}</Option>);

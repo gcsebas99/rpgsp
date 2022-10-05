@@ -3,8 +3,6 @@ import { useState, useContext } from 'react';
 import { AppContext } from '../../stores/AppStore';
 import AppLogicController from '../../controllers/AppLogicController';
 import { useLiveQuery } from 'dexie-react-hooks';
-// import EntitySelectorView from '../entity_views/EntitySelectorView';
-// import SequencedActionListItem from '../entity_views/SequencedActionListItem';
 import AddEditSingleGameAction from '../drawers/AddEditSingleGameAction';
 import AppDataFetchController from '../../controllers/AppDataFetchController';
 import ConditionEditorUtils from '../../utils/ConditionEditorUtils';

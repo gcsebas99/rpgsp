@@ -25,6 +25,8 @@ const ChapterView = ({
   onAddAct = () => {},
   onEditAct = () => {},
   onRemoveAct = () => {},
+  //
+  onAddEditCondition = () => {},
 }) => {
   const [,dispatch] = useContext(AppContext);
 
@@ -106,6 +108,7 @@ const ChapterView = ({
               onEdit={() => { onEditAct(act) }} 
               onMoveOrderUp={() => { moveActUp(act) }} 
               onMoveOrderDown={() => { moveActDown(act) }} 
+              onAddEditCondition={onAddEditCondition}
             />
             )
           }

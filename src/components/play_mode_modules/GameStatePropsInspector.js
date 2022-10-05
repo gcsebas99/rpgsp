@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import AppDataFetchController from '../../controllers/AppDataFetchController';
 import TitledCard from '../ui/TitledCard';

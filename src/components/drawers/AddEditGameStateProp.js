@@ -2,13 +2,15 @@ import { useState, useEffect, useContext, Fragment } from 'react';
 import { Drawer, Form, Button, Col, Row, Input, InputNumber, Select, Switch, message } from 'antd';
 import { AppContext } from '../../stores/AppStore';
 import AppLogicController from '../../controllers/AppLogicController';
-import AppValidationsController from '../../controllers/AppValidationsController';
 import { useLiveQuery } from 'dexie-react-hooks';
 import db from '../../db/AppDatabase';
 import EntitySelectorView from '../entity_views/EntitySelectorView';
+import MultiEntityPicker from '../entity_views/MultiEntityPicker';
 
 const { TextArea } = Input;
 const { Option } = Select;
+
+const NO_TREF_TYPES = ['int', 'intarr', 'boolean', 'booleanarr', 'string', 'stringarr'];
 
 const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerClose }) => {
   const [,dispatch] = useContext(AppContext);
@@ -21,6 +23,8 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
   const [defaultValueString, setDefaultValueString] = useState('');
   const [defaultValueEntity, setDefaultValueEntity] = useState(-1);
   const [defaultValueEntityName, setDefaultValueEntityName] = useState(null);
+  const [defaultValueEntityArray, setDefaultValueEntityArray] = useState([]);
+  const [defaultValueEntityArrayNames, setDefaultValueEntityArrayNames] = useState([]);
   const [defaultValueArray, setDefaultValueArray] = useState(true);
 
   const customEntityDefs = useLiveQuery(() => db.custom_entity_defs.toArray());
@@ -28,8 +32,8 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
   useEffect(() => {
     const populateDefault = (gameStateProp) => {
       const defaultValue = gameStateProp.default;
-      if(!type.endsWith('arr')) { //not array
-        switch(type) {
+      if(!gameStateProp.type.endsWith('arr')) { //not array
+        switch(gameStateProp.type) {
           case 'int':
             form.setFieldsValue({defaultValueInt: defaultValue});
             break;
@@ -49,26 +53,28 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
             break;
         }
       } else { //array
-        if(defaultValue.length === 0) {
-          return;
-        }
-        const valuesArray = defaultValue.split(',');
-        switch(type) {
-          case 'intarr':
-          case 'booleanarr':
-            form.setFieldsValue({defaultValueArray: valuesArray.join('\n')});
-            break;
-          case 'stringarr':
-          case 'locationarr':
-          case 'areaarr':
-          case 'characterarr':
-          default: //custom entity array
-            let unquotedEntries = [];
-            for (const entry of valuesArray) {
-              unquotedEntries.push(entry.slice(1, -1));
-            }
-            form.setFieldsValue({defaultValueArray: unquotedEntries.join('\n')});
-            break;
+        if(isMultiPicker(gameStateProp.type)) {
+          setDefaultValueEntityArray(gameStateProp.default_tids !== null ? gameStateProp.default_tids : []);
+        } else {
+          if(defaultValue.length === 0) {
+            return;
+          }
+          const valuesArray = defaultValue.split(',');
+          switch(gameStateProp.type) {
+            case 'intarr':
+            case 'booleanarr':
+              form.setFieldsValue({defaultValueArray: valuesArray.join('\n')});
+              break;
+            case 'stringarr':
+              let unquotedEntries = [];
+              for (const entry of valuesArray) {
+                unquotedEntries.push(entry.slice(1, -1));
+              }
+              form.setFieldsValue({defaultValueArray: unquotedEntries.join('\n')});
+              break;
+            default:
+              break;
+          }
         }
       }
     };
@@ -106,6 +112,8 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
     }
     if(value.endsWith('arr')){
       form.setFieldsValue({defaultValueArray: ''});
+      setDefaultValueEntityArray([]);
+      setDefaultValueEntityArrayNames([]);
     }
     if(value !== '' && value !== 'int' && value !== 'boolean' && value !== 'string' && !value.endsWith('arr')){
       setDefaultValueEntity(-1);
@@ -122,7 +130,15 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
   };
 
   const displayArrayDefaultField = () => {
-    return type.endsWith('arr');
+    return type.endsWith('arr') && (type === 'intarr' || type === 'booleanarr' || type === 'stringarr');
+  };
+
+  const displayArrayPickerField = () => {
+    return type.endsWith('arr') && (type !== 'intarr' & type !== 'booleanarr' && type !== 'stringarr');
+  };
+
+  const isMultiPicker = (type) => {
+    return type.endsWith('arr') && (type !== 'intarr' & type !== 'booleanarr' && type !== 'stringarr');
   };
 
   const arrayFieldLabelAndPlaceholder = (label = true) => {
@@ -176,7 +192,11 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
           //custom entity
           saveGameStateProp(values);
         } else { //any array type
-          valudateArrayTypes(values)
+          if(isMultiPicker(type)) {
+            saveGameStateProp(values);
+          } else {
+            valudateArrayTypes(values);
+          }
         }
         break;
     }
@@ -216,37 +236,7 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
           }
           saveGameStateProp(values);
           break;
-        case 'locationarr':
-          AppValidationsController.validateEntityNames(valuesArray, db.locations).then(() => {
-            saveGameStateProp(values);
-          }).catch(invalidLocations => {
-            message.error('Invalid values: ' + invalidLocations.join(', '));
-          });
-          break;
-        case 'areaarr':
-          AppValidationsController.validateEntityNames(valuesArray, db.areas).then(() => {
-            saveGameStateProp(values);
-          }).catch(invalidAreas => {
-            message.error('Invalid values: ' + invalidAreas.join(', '));
-          });
-          break;
-        case 'characterarr':
-          AppValidationsController.validateEntityNames(valuesArray, db.characters).then(() => {
-            saveGameStateProp(values);
-          }).catch(invalidCharacters => {
-            message.error('Invalid values: ' + invalidCharacters.join(', '));
-          });
-          break;
-        default: //custom entities
-          const singular_name = type.slice(0, -3);
-          const customEntityDef = customEntityDefs.find(customEntityDef => customEntityDef.singular_name === singular_name);
-          if (customEntityDef) {
-            AppValidationsController.validateCustomEntityNames(valuesArray, customEntityDef.id).then(() => {
-              saveGameStateProp(values);
-            }).catch(invalidEntities => {
-              message.error('Invalid values: ' + invalidEntities.join(', '));
-            });
-          }
+        default:
           break;
       }
     }
@@ -283,52 +273,81 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
   };
 
   const getDefaultValue = (values) => {
+    let defs = {defaultValue: null, defaultTable: null, defaultTids: null};
+    //set table
+    if(!NO_TREF_TYPES.includes(type)) {
+      switch(type) {
+        case 'location':
+        case 'locationarr':
+          defs.defaultTable = 'locations';
+          break;
+        case 'area':
+        case 'areaarr':
+          defs.defaultTable = 'areas';
+          break;
+        case 'character':
+        case 'characterarr':
+          defs.defaultTable = 'characters';
+          break;
+        default: //custom entity
+          defs.defaultTable = 'custom_entities';
+          break;
+      }
+    }
+    //set default and tids
     if(!type.endsWith('arr')) { //not array
       switch(type) {
         case 'int':
-          return {defaultValue: parseInt(values.defaultValueInt)};
+          defs.defaultValue = parseInt(values.defaultValueInt);
+          break;
         case 'boolean':
-          return {defaultValue: values.defaultValueBool};
+          defs.defaultValue = values.defaultValueBool;
+          break;
         case 'string':
-          return {defaultValue: values.defaultValueString};
+          defs.defaultValue = values.defaultValueString;
+          break;
         case 'location':
         case 'area':
         case 'character':
         default: //custom entity
-          let table;
-          if(type === 'location' || type === 'area' || type === 'character') {
-            table = type + 's';
-          } else {
-            table = 'custom_entities';
-          }
           if(defaultValueEntity !== -1) {
-            return {defaultValue: defaultValueEntityName, defaultTable: table, defaultTids: defaultValueEntity};
-          } else {
-            return {defaultValue: null, defaultTable: table, defaultTids: null};
+            defs.defaultValue = defaultValueEntityName;
+            defs.defaultTids = defaultValueEntity;
           }
+          break;
       }
     } else { //array
-      const defaultValues = values.defaultValueArray;
-      if(defaultValues.length === 0) {
-        return {defaultValue: ''};
-      }
-      const valuesArray = defaultValues.split('\n');
-      switch(type) {
-        case 'intarr':
-        case 'booleanarr':
-          return {defaultValue: valuesArray.join(',')};
-        case 'stringarr':
-        case 'locationarr':
-        case 'areaarr':
-        case 'characterarr':
-        default: //custom entity array
-          let quotesWrappedEntries = [];
-          for (const entry of valuesArray) {
-            quotesWrappedEntries.push('"' + entry + '"');
+      let quotesWrappedEntries = [];
+      if(displayArrayPickerField()) {
+        for (const entry of defaultValueEntityArrayNames) {
+          quotesWrappedEntries.push('"' + entry + '"');
+        }
+        defs.defaultValue = quotesWrappedEntries.join(',');
+        defs.defaultTids = defaultValueEntityArray;
+      } else {
+        const defaultValues = values.defaultValueArray;
+        if(defaultValues.length === 0) {
+          defs.defaultValue = '';
+        } else {
+          const valuesArray = defaultValues.split('\n');
+          switch(type) {
+            case 'intarr':
+            case 'booleanarr':
+              defs.defaultValue = valuesArray.join(',');
+              break;
+            case 'stringarr':
+              for (const entry of valuesArray) {
+                quotesWrappedEntries.push('"' + entry + '"');
+              }
+              defs.defaultValue = quotesWrappedEntries.join(',');
+              break;
+            default:
+              break;
           }
-          return {defaultValue: quotesWrappedEntries.join(',')};
+        }
       }
     }
+    return defs;
   };
 
   const isNameDisabled = () => {
@@ -361,7 +380,7 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
   return (
     <Drawer
       title={(gameStateProp === null) ? 'New prop' : 'Edit prop'}
-      width={360}
+      width={displayArrayPickerField() ? 490 : 360}
       onClose={closeDrawer}
       visible={visible}
       bodyStyle={{ paddingBottom: 20 }}
@@ -472,6 +491,20 @@ const AddEditGameStateProp = ({ gameStateProp = null, isDrawerVisible, onDrawerC
             </Form.Item>
           </Col>
         </Row>
+        <Row gutter={16} style={{display: (displayArrayPickerField() ? 'block' : 'none')}}>
+          <Col span={24}>
+            <Form.Item
+              label={'Default value'}
+            >
+              {displayArrayPickerField() &&
+                <MultiEntityPicker entityType={type.slice(0, -3)} defaultTargetKeys={defaultValueEntityArray} onChangeCallback={(e, n) => { setDefaultValueEntityArray(e); setDefaultValueEntityArrayNames(n); }} disabled={isDefaultDisabled()}/>
+              }
+            </Form.Item>
+          </Col>
+        </Row>
+
+
+
       </Form>
     </Drawer>
   );

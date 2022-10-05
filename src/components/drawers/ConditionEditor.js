@@ -22,6 +22,7 @@ const ConditionEditor = ({ isDrawerVisible, onDrawerClose }) => {
   const [form] = Form.useForm();
   const [visible, setVisible] = useState(false);
   const [condition, setCondition] = useState(null);
+  const [editorMode, setEditorMode] = useState(null);
   const [conditionType, setConditionType] = useState('1'); //1 => single, 2 => complex
   const [validCondition, setValidCondition] = useState(false);
   //single expression
@@ -48,6 +49,7 @@ const ConditionEditor = ({ isDrawerVisible, onDrawerClose }) => {
       resetEditor();
       form.resetFields();
       setCondition(state.activeCondition);
+      setEditorMode(state.conditionEditorMode);
       fillConditionValues();
       engine = new ConditionEngine();
       openDrawer();
@@ -103,7 +105,13 @@ const ConditionEditor = ({ isDrawerVisible, onDrawerClose }) => {
     let gameStateProp;
     let exp;
     let newComplexConditionExpressions = [];
-    setComplexCondition(condition.logic_func);
+
+    if(editorMode === 'NAV_ACTION' && condition.logic_func.length === 1){
+      setComplexCondition([...condition.logic_func, {type: 'logic', name: 'AND', displayName: 'AND'}]);
+    } else {
+      setComplexCondition(condition.logic_func);
+    }
+
     condition.expressions.forEach(condExpression => {
       gameStateProp = gameStates.find(gameState => gameState.id === condExpression.gsp_id);
       exp = EditorUtils.getEmptyExpression(condExpression.name);
@@ -189,6 +197,9 @@ const ConditionEditor = ({ isDrawerVisible, onDrawerClose }) => {
         newCondition.push({'type': 'grouping', 'name': 'CLOSE', 'displayName': ')'});
         break;
       case 'DELETE':
+        if(editorMode === 'NAV_ACTION' && newCondition.length === 2){
+          return;
+        }
         const removed = newCondition.pop();
         if(removed && removed.type === 'exp') {
           let newComplexConditionExpressions = [...complexConditionExpressions];
@@ -197,8 +208,15 @@ const ConditionEditor = ({ isDrawerVisible, onDrawerClose }) => {
         }
         break;
       case 'CLEAR':
-        newCondition = [];
-        setComplexConditionExpressions([]);
+        if(editorMode === 'NAV_ACTION'){
+          newCondition = newCondition.slice(0, 2);
+          let newComplexConditionExpressions = [...complexConditionExpressions];
+          newComplexConditionExpressions = newComplexConditionExpressions.slice(0, 1);
+          setComplexConditionExpressions(newComplexConditionExpressions);
+        } else {
+          newCondition = [];
+          setComplexConditionExpressions([]);
+        }
         break;
       default:
         break;
@@ -364,6 +382,7 @@ const ConditionEditor = ({ isDrawerVisible, onDrawerClose }) => {
       onClose={closeDrawer}
       visible={visible}
       bodyStyle={{ paddingBottom: 20 }}
+      zIndex={1010}
       footer={
         <div style={{textAlign: 'right'}} >
           <Button onClick={closeDrawer} style={{ marginRight: 8 }}>
@@ -380,7 +399,7 @@ const ConditionEditor = ({ isDrawerVisible, onDrawerClose }) => {
     >
       <Form layout='vertical' name='add-edit-condition' id='add-edit-condition-id' form={form} onFinish={onFinish} requiredMark={false}>
         <Tabs tabPosition='left' activeKey={conditionType} onChange={(activeKey) => { setConditionType(activeKey); setValidCondition(false); }}>
-          <TabPane tab="Single" key="1">
+          <TabPane tab="Single" key="1" disabled={editorMode === 'NAV_ACTION'}>
             <Row gutter={[24, 16]}>
               <Col span={8}>
                 <Form.Item
@@ -423,11 +442,12 @@ const ConditionEditor = ({ isDrawerVisible, onDrawerClose }) => {
                     style={{marginBottom: 16, maxWidth: '94%'}}
                     header={complexConditionExpressionsHeader}
                     dataSource={complexConditionExpressions}
-                    renderItem={item => (
+                    renderItem={(item, index) => (
                       <ComplexConditionExpressionListItem
                         expression={item}
                         gameStates={gameStates}
                         onChange={handleComplexCondExpressionChange}
+                        disabled={editorMode === 'NAV_ACTION' && index === 0}
                       />
                     )}
                   />

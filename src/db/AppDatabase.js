@@ -8,30 +8,34 @@ db.version(1).stores({
     stories: '++id',                                //title, version
     game_state_props: '++id, name',                 //type, default, edit_mode, removable, default_table, default_tids
     locations: '++id, name',                        //description, map
-    areas: '++id, location_id, name',               //description, color
-    characters: '++id, name',                       //description, is_pc, color
+    areas: '++id, location_id, name',               //description, color, sound
+    characters: '++id, name',                       //description, is_pc, color, image
     custom_entity_defs: '++id, singular_name',      //name, key, color
     custom_entities: '++id, custom_entity_def_id, name',  //description
     default_entity_colors: '++id',                  //name, color
     //story setup
     chapters: '++id, order',                        //name, description
-    acts: '++id, order, chapter_id, type',          //name, description
+    acts: '++id, order, chapter_id, type',          //name, description, end_condition
     sequenced_actions: '++id, act_id, order',       //text_value, type, character_id
 
     //navigation_actions: '++id',                   //description, effects
     //interactive_actions: '++id',                  //description, effects
     //no_effect_actions: '++id',                    //description, effects
 
-    game_actions: '++id, type',                     //description, allow_repeat, required_condition
+    game_actions: '++id, type',                     //description, allow_repeat, required_condition, effects_display
 
-    //action_associations: '++id', 
+    effects: '++id, action_id, order, type',        //conv_id, conv_at, gsp_id, mutator, value
+    action_assoc: 'action1_id, action2_id',
+
+    nav_action_builders: '++id, nav1_id, nav2_id',  //area1, area2, two_way
 
     conversations: '++id',                          //name, characters
     conversation_dialogs: '++id, conversation_id, order',  //dialog, character_id
 
 
+    run_configurations: 'name, value',
     //play-mode
-    play_game_state_props: 'game_state_prop_id, name', //type, value, prev_value, color
+    play_game_state_props: 'game_state_prop_id, name', //type, value, prev_value, color, ref_table, tids, prev_tids
 });
 
 //default_entity_colors for: locations, areas, characters
@@ -46,6 +50,8 @@ db.version(1).stores({
 //nav = in navigation tab, must have area change in effects (currentArea)
 //noeff = no effect allowed
 //inter = no area change allowed (currentArea)
+
+//nav_action_builders.nav1_id and nav_action_builders.nav2_id are game_actions
 
 //game_actions.required_condition = (json)
 // {

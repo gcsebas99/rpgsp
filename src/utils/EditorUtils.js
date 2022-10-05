@@ -54,6 +54,53 @@ class EditorUtils {
     }
   }
 
+  static getMutatorName(id) {
+    switch(id) {
+      case 'INCREMENT': return 'Increment';
+      case 'DECREASE': return 'Decrease';
+      case 'SET': return 'Set value';
+      case 'TOGGLE': return 'Toggle';
+      case 'CLEAR': return 'Clear';
+      case 'ADD': return 'Add one or many';
+      case 'REMOVE': return 'Remove one or many';
+      default: return '';
+    }
+  }
+
+  static getMutatorsForPropType(propType) {
+    if(!propType.endsWith('arr')) { //not array
+      switch(propType) {
+        case 'int':
+          return [
+            {id: 'INCREMENT', name: 'Increment'},
+            {id: 'DECREASE', name: 'Decrease'},
+            {id: 'SET', name: 'Set value'},
+          ];
+        case 'boolean':
+          return [
+            {id: 'TOGGLE', name: 'Toggle'},
+            {id: 'SET', name: 'Set value'},
+          ];
+        case 'string':
+        case 'location':
+        case 'area':
+        case 'character':
+        default: //custom entity
+          return [
+            {id: 'SET', name: 'Set value'},
+            {id: 'CLEAR', name: 'Clear'},
+          ];
+      }
+    } else { //array
+      return [
+        {id: 'ADD', name: 'Add one or many'},
+        {id: 'REMOVE', name: 'Remove one or many'},
+        // {id: 'REPLACE', name: 'Replace one'},
+        {id: 'CLEAR', name: 'Clear'},
+      ];
+    }
+  }
+
   static getInputTypeForExpression(propType, comparatorId) {
     if(!propType.endsWith('arr')) { //not array
       switch(propType) {
@@ -105,6 +152,77 @@ class EditorUtils {
     }
   }
 
+  static getInputTypeForMutator(propType, mutatorId) {
+    if(!propType.endsWith('arr')) { //not array
+      switch(propType) {
+        case 'int':
+          return 'TEXT_INT';
+        case 'boolean':
+          switch(mutatorId) {
+            case 'TOGGLE':
+              return 'NONE';
+            case 'SET':
+            default:
+              return 'BOOLEAN';
+          }
+        case 'string':
+          switch(mutatorId) {
+            case 'SET':
+              return 'TEXT_STRING';
+            case 'CLEAR':
+            default:
+              return 'NONE';
+          }
+        case 'location':
+        case 'area':
+        case 'character':
+        default: //custom entity
+          switch(mutatorId) {
+            case 'SET':
+              return 'SELECTOR_ENTITY';
+            case 'CLEAR':
+            default:
+              return 'NONE';
+          }
+      }
+    } else { //array
+      switch(mutatorId) {
+        case 'ADD':
+        case 'REMOVE':
+          switch(propType) {
+            case 'intarr':
+              return 'SELECTOR_TAG_INT';
+            case 'booleanarr':
+              return 'PICKER_BOOLEAN';
+            case 'stringarr':
+              return 'SELECTOR_TAG_STRING';
+            case 'locationarr':
+            case 'areaarr':
+            case 'characterarr':
+            default: //custom entity array
+              return 'SELECTOR_MULTI_ENTITY';
+          }
+        // case 'REPLACE': 
+        //   switch(propType) {
+        //     case 'intarr':
+        //       return 'REPLACE_INT';
+        //     case 'booleanarr':
+        //       return 'REPLACE_BOOLEAN';
+        //     case 'stringarr':
+        //       return 'REPLACE_STRING';
+        //     case 'locationarr':
+        //     case 'areaarr':
+        //     case 'characterarr':
+        //     default: //custom entity array
+        //       return 'REPLACE_ENTITY';
+        //   }
+        case 'CLEAR':
+        default:
+          return 'NONE';
+      }
+    }
+  }
+
   static getEmptyExpression(name = null) {
     let emptyExpression = {
       gsProp: null,
@@ -119,6 +237,17 @@ class EditorUtils {
       emptyExpression.name = name;
     }
     return emptyExpression;
+  }
+
+  static getEmptyEffect() {
+    return {
+      gsProp: null,
+      gsPropType: null,
+      mutatorId: null,
+      valueInputType: null,
+      value: null,
+      valueDisplay: null,
+    };
   }
 
 }

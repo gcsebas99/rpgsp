@@ -41,14 +41,71 @@
 
     }
   }
+}
 
-  .ant-card {
-    .ant-card-body {
-      padding: 6px 10px;
+/*custom fonts*/
+@font-face {
+  font-family: 'AdventureRequest';
+  src: url('../fonts/AdventureRequest-j8W9.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'BreatheFireIII';
+  src: url('../fonts/BreatheFireIii-PKLOB.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'PipeDream';
+  src: url('../fonts/PipeDream-1Zwg.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'PixelAzureBonds';
+  src: url('../fonts/PixelAzureBonds-327Z.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'PixelEmulator';
+  src: url('../fonts/PixelEmulator-xq08.ttf') format('truetype');
+}
 
-      h5 {
-        margin-top: -18px;
-      }
-    }
+.c-f {
+  &.cf-adventure_request {
+    font-family: 'AdventureRequest';
+  }
+  &.cf-breathe_fire_iii {
+    font-family: 'BreatheFireIII';
+  }
+  &.cf-pipe_dream {
+    font-family: 'PipeDream';
+  }
+  &.cf-pixel_azure_bonds {
+    font-family: 'PixelAzureBonds';
+  }
+  &.cf-pixel_emulator {
+    font-family: 'PixelEmulator';
   }
 }
+
+
+/* map animation */
+.map-cell-active {
+  animation-name: bghighlight;
+  animation-duration: 2s;
+  animation-timing-function: ease-in;
+  animation-iteration-count: infinite;
+}
+@keyframes bghighlight {
+  0% {
+    // background-color: rgba(255, 255, 255, 1);
+    opacity: 1;
+  }
+  50% {
+    // background-color: rgba(255, 255, 255, 0.6);
+    opacity: 0.6;
+  }
+  100% {
+    // background-color: rgba(255, 255, 255, 1);
+    opacity: 1;
+  }
+}
+
+
+
+
